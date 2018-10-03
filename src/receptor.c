@@ -1,21 +1,9 @@
 /*Non-Canonical Input Processing*/
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-
-#define BAUDRATE B38400
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define FALSE 0
-#define TRUE 1
-
-volatile int STOP=FALSE;
+#include "utilities.c"
 
 int main(int argc, char** argv)
 {
-    int fd,c, res;
+    int fd, res;
     struct termios oldtio,newtio;
     char buf[255];
 
@@ -74,7 +62,7 @@ int main(int argc, char** argv)
     while (STOP==FALSE) {       /* loop for input */
       res = read(fd,buf,1);   /* returns after 5 chars have been input */
       buf[res]=0;               /* so we can printf... */
-      printf("%s", buf, res);
+      //printf("%s", buf, res);
       if (buf[0]=='\0') STOP=TRUE;
     }
 

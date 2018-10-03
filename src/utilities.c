@@ -3,14 +3,23 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
+
+#define BAUDRATE B38400
+#define MODEMDEVICE "/dev/ttyS1"
+#define _POSIX_SOURCE 1 /* POSIX compliant source */
+#define FALSE 0
+#define TRUE 1
 #define FLAG 0x7E
 #define AD 0x03
-#define UA 0x07
-#define emissor 1
-#define recetor 0
 
-int verifier(int step,unsigned char mess,int id){
+volatile int STOP=FALSE;
+
+
+/*int verifier(int step,unsigned char mess,int id){
 	switch(step)
 	{
 		case 0:
@@ -43,5 +52,5 @@ int verifier(int step,unsigned char mess,int id){
 			if(mess==FLAG)
 				step++;
 			else
-				step=0;
+				step=0;*/
 		

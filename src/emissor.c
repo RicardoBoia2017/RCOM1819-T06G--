@@ -1,27 +1,13 @@
 /*Non-Canonical Input Processing*/
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-
-#define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS1"
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define FALSE 0
-#define TRUE 1
-#define FLAG 0x7E
-#define AD 0x03
-
-volatile int STOP=FALSE;
+#include "utilities.c"
 
 int main(int argc, char** argv)
 {
-    int fd,c, res;
+    int fd,res;
     struct termios oldtio,newtio;
-    char buf[255];
-    int i, sum = 0, speed = 0;
+
+    //char buf[255];
+    
 	unsigned char SETUP[5];
 	
     
@@ -66,7 +52,6 @@ int main(int argc, char** argv)
   */
 
 
-
     tcflush(fd, TCIOFLUSH);
 
     if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
@@ -74,7 +59,7 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    printf("New termios structure set\n");
+    printf("New termios structure set Noncanonical mode\n");
 	
 	SETUP[0]=FLAG;
 	SETUP[1]=AD;
