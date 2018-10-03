@@ -46,10 +46,66 @@ void sendMessage(int fd){
       perror("write");
       exit(-1);
     }
-    printf("%ds\n",byteChar);
+    printf("%d bytes\n",byteChar);
   }
 
 }
+
+int stateValidMessage(int fd,char res[]){
+  int state=0,aux;
+  char readed;
+
+  while(1){
+    aux=read(fd,&readed,1);
+    if(aux==-1){
+      perror("state_read");
+      exit(-1);
+
+    }
+
+    printf("readed=%x state=%d\n",readed,state );
+
+    switch (state) {
+      case 0:
+              if(readed==FLAG){
+                state=1;
+              }else state=0;
+      break;
+      case 1:
+              res[0]=readed;
+              if(readed==A){
+                state=2;
+              }else state=0;
+      break;
+      case 2:
+              res[1]=readed;
+              if(readed==C_SET){
+                state=3;
+              }else state=0;
+      break;
+      case 3:
+              if((res[0]^res[1])==readed){
+                state=4;
+              }else state=0;
+      break;
+      case 4:
+              if(readed==FLAG){
+                state=5;
+                return 0;
+              }else state=0;
+      break;
+
+
+    }
+
+
+  }
+  return 0;
+
+}
+
+
+
 
 /*int verifier(int step,unsigned char mess,int id){
 	switch(step)

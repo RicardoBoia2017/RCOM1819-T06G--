@@ -3,9 +3,10 @@
 
 int main(int argc, char** argv)
 {
-    int fd,res;
+    int fd;//res;
     struct termios oldtio,newtio;
-    char buf[5];
+    //char buf[5];
+    char result_A_C[2];
 
     if ( (argc < 2) ||
   	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
@@ -59,8 +60,14 @@ int main(int argc, char** argv)
     printf("New termios structure set( Noncanonical mode)\n\n");
     printf("Ready to receve messsage\n");
 
+    stateValidMessage(fd,result_A_C);
 
-    for(int i=0;i<BYTE_TO_SEND;i++){
+    for(int i=0;i<2;i++){
+        printf("%x\n",result_A_C[i]);
+    }
+
+
+    /*for(int i=0;i<BYTE_TO_SEND;i++){
       res=read(fd,buf,1);
       printf("%d\n",buf[i]);
 
@@ -68,7 +75,7 @@ int main(int argc, char** argv)
         perror("read");
         exit(-1);
       }
-    }
+    }*/
 
 
 
