@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
     if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
       perror("tcgetattr");
-      exit(-1);
+      exit(-1); 
     }
 
     bzero(&newtio, sizeof(newtio));
