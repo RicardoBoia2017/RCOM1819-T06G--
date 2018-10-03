@@ -14,10 +14,42 @@
 #define FALSE 0
 #define TRUE 1
 #define FLAG 0x7E
-#define AD 0x03
+#define A 0x03
+#define C_SET 0x03
+#define C_DISC 0x0B
+#define C_UA 0x07
+#define C_RR 0x05
+#define C_REJ 0x01
+#define BYTE_TO_SEND 5
+
+unsigned char SETUP[5];
 
 volatile int STOP=FALSE;
 
+
+void prepareMessage(){
+  SETUP[0]=FLAG;
+	SETUP[1]=A;
+	SETUP[2]=C_SET;
+	SETUP[3]=SETUP[1]^SETUP[2];
+	SETUP[4]=FLAG;
+
+}
+
+
+void sendMessage(int fd){
+  int byteChar=0;
+
+  while (byteChar!=BYTE_TO_SEND) {
+    byteChar=write(fd,SETUP,BYTE_TO_SEND);
+    if(byteChar==-1){
+      perror("write");
+      exit(-1);
+    }
+    printf("%ds\n",byteChar);
+  }
+
+}
 
 /*int verifier(int step,unsigned char mess,int id){
 	switch(step)
@@ -53,4 +85,3 @@ volatile int STOP=FALSE;
 				step++;
 			else
 				step=0;*/
-		

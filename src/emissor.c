@@ -3,16 +3,12 @@
 
 int main(int argc, char** argv)
 {
-    int fd,res;
+    int fd;
     struct termios oldtio,newtio;
 
-    //char buf[255];
-    
-	unsigned char SETUP[5];
-	
-    
-    if ( (argc < 2) || 
-  	     ((strcmp("/dev/ttyS0", argv[1])!=0) && 
+
+    if ( (argc < 2) ||
+  	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
   	      (strcmp("/dev/ttyS1", argv[1])!=0) )) {
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
       exit(1);
@@ -30,7 +26,7 @@ int main(int argc, char** argv)
 
     if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
       perror("tcgetattr");
-      exit(-1); 
+      exit(-1);
     }
 
     bzero(&newtio, sizeof(newtio));
@@ -46,9 +42,9 @@ int main(int argc, char** argv)
 
 
 
-  /* 
-    VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
-    leitura do(s) próximo(s) caracter(es)
+  /*
+    VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a
+    leitura do(s) prï¿½ximo(s) caracter(es)
   */
 
 
@@ -60,25 +56,20 @@ int main(int argc, char** argv)
     }
 
     printf("New termios structure set Noncanonical mode\n");
-	
-	SETUP[0]=FLAG;
-	SETUP[1]=AD;
-	SETUP[2]=AD;
-	SETUP[3]=SETUP[1]^SETUP[2];
-	SETUP[4]=FLAG;
-    
-    res = write(fd,SETUP,5);
-    printf("%d bytes written\n", res);
- 
 
-  /* 
-    O ciclo FOR e as instruções seguintes devem ser alterados de modo a respeitar 
-    o indicado no guião 
+    prepareMessage();
+    sendMessage(fd);
+
+    printf("%s\n","message sended" );
+
+
+  /*
+    O ciclo FOR e as instruï¿½ï¿½es seguintes devem ser alterados de modo a respeitar
+    o indicado no guiï¿½o
   */
 
+    sleep(2);
 
-	sleep(2);
-   
     if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
       perror("tcsetattr");
       exit(-1);
