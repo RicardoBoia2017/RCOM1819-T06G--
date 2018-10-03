@@ -3,9 +3,9 @@
 
 int main(int argc, char** argv)
 {
-    int fd, res;
+    int fd,res;
     struct termios oldtio,newtio;
-    char buf[255];
+    char buf[5];
 
     if ( (argc < 2) ||
   	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     newtio.c_lflag = 0;
 
     newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-    newtio.c_cc[VMIN]     = 5;   /* blocking read until 5 chars received */
+    newtio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
 
 
 
@@ -56,21 +56,29 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    printf("New termios structure set\n");
+    printf("New termios structure set( Noncanonical mode)\n\n");
+    printf("Ready to receve messsage\n");
 
 
-    while (STOP==FALSE) {       /* loop for input */
-      res = read(fd,buf,1);   /* returns after 5 chars have been input */
-      buf[res]=0;               /* so we can printf... */
-      //printf("%s", buf, res);
-      if (buf[0]=='\0') STOP=TRUE;
+    for(int i=0;i<BYTE_TO_SEND;i++){
+      res=read(fd,buf,1);
+      printf("%d\n",buf[i]);
+
+      if(res==-1){
+        perror("read");
+        exit(-1);
+      }
     }
+
+
 
 
 
   /*
     O ciclo WHILE deve ser alterado de modo a respeitar o indicado no gui�o
   */
+
+    sleep(2);
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
