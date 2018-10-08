@@ -61,8 +61,8 @@ int main(int argc, char** argv)
     printf("Ready to receve messsage\n");
 
     stateValidMessage(fd,result_A_C);
-
-    for(int i=0;i<2;i++){
+    int i;
+    for(i=0;i<2;i++){
         printf("%x\n",result_A_C[i]);
     }
 
