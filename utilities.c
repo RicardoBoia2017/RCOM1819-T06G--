@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 
 #define BAUDRATE B38400
@@ -27,7 +28,11 @@ unsigned char SETUP[5];
 volatile int STOP=FALSE;
 
 
-void prepareMessage(){
+
+
+
+
+void prepareMessage(){ 
   SETUP[0]=FLAG;
 	SETUP[1]=A;
 	SETUP[2]=C_SET;
@@ -62,6 +67,8 @@ int stateValidMessage(int fd,char res[], unsigned char end){
       exit(-1);
 
     }
+
+
 
     printf("readed=%x state=%d\n",readed,state );
 
@@ -100,6 +107,7 @@ int stateValidMessage(int fd,char res[], unsigned char end){
 
 
   }
+
   return 0;
 
 }

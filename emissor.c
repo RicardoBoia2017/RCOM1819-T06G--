@@ -1,9 +1,22 @@
 /*Non-Canonical Input Processing*/
 #include "utilities.c"
+int flag=1,conta=1;
+
+
+
+
+void atende()                   // atende alarme
+{
+	printf("alarme # %d\n", conta);
+	flag=1;
+	conta++;
+} 
+
 
 int main(int argc, char** argv)
 {
     int fd;
+   int flag=1;
     //unsigned char buf [5];
     char result_A_C[2];
     struct termios oldtio,newtio;
@@ -58,32 +71,38 @@ int main(int argc, char** argv)
     }
 
     printf("New termios structure set Noncanonical mode\n");
+    
+    (void) signal(SIGALRM, atende);
 
     prepareMessage();
-    sendMessage(fd);
-    printf("%s\n","message sended" );
-
-    sleep(2);
-    
-    stateValidMessage(fd,result_A_C, C_UA);
-
-   /* while(t!=BYTE_TO_SEND){
-
-      read(fd,buf,1);
-      printf("readed=%x\n",buf[t]);
-      t++;
-    }*/
-
-    printf("%s\n","receve conf" );
-
 
 
     
+    //  // instala  rotina que     atende interrupcao
+
+   
+while(conta < 4){
+   if(flag){
+      
+      sendMessage(fd);
+      alarm(3);
 
     
+    if(stateValidMessage(fd,result_A_C, C_UA)==0){
+            break;
+
+      }
+	
+
+                 // activa alarme de 3s
+      //flag=0;
+   }
+}
+    printf("Vou terminar.\n");
 
 
-    
+   
+
 
 
   /*
