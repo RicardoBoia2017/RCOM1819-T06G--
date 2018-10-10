@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
     int fd;//res;
     struct termios oldtio,newtio;
-    //char buf[5];
+    char UA[5];
     char result_A_C[2];
 
     if ( (argc < 2) ||
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
         printf("%x\n",result_A_C[i]);
     }
 
-
+    
     /*for(int i=0;i<BYTE_TO_SEND;i++){
       res=read(fd,buf,1);
       printf("%d\n",buf[i]);
@@ -80,8 +80,13 @@ int main(int argc, char** argv)
     }*/
 
 
+	UA [0] = FLAG;
+	UA [1] = result_A_C[0];
+	UA [2] = C_UA;
+	UA [3] = UA[1]^UA[2];
+	UA [4] = FLAG;
 
-
+	write(fd, UA, 5);
 
   /*
     O ciclo WHILE deve ser alterado de modo a respeitar o indicado no gui�o
