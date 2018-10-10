@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <setjmp.h>
+
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -54,15 +54,16 @@ void sendMessage(int fd){
 int stateValidMessage(int fd,char res[], unsigned char end){
   int state=0,aux;
   char readed;
-	
+
   while(1){
-
-    	aux=read(fd,&readed,1);
-
+    aux=read(fd,&readed,1);
     if(aux==-1){
       perror("state_read");
       exit(-1);
+
     }
+
+
 
     printf("readed=%x state=%d\n",readed,state );
 
@@ -96,7 +97,7 @@ int stateValidMessage(int fd,char res[], unsigned char end){
               }else state=0;
       break;
 
-	
+
     }
 
 
