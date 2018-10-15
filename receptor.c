@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
     int fd;//res;
     struct termios oldtio,newtio;
-    char UA[5];
+    //char buf[5];
     char result_A_C[2];
 
     if ( (argc < 2) ||
@@ -60,19 +60,16 @@ int main(int argc, char** argv)
     printf("New termios structure set( Noncanonical mode)\n\n");
     printf("Ready to receve messsage\n");
 
-    stateValidMessage(fd,result_A_C, C_SET);
+    stateValidMessage(fd,result_A_C);
 
-
-   int i=0;
-    for(i=0;i<2;i++){
+    for(int i=0;i<2;i++){
         printf("%x\n",result_A_C[i]);
     }
 
-    
+
     /*for(int i=0;i<BYTE_TO_SEND;i++){
       res=read(fd,buf,1);
       printf("%d\n",buf[i]);
-
       if(res==-1){
         perror("read");
         exit(-1);
@@ -80,13 +77,8 @@ int main(int argc, char** argv)
     }*/
 
 
-	UA [0] = FLAG;
-	UA [1] = result_A_C[0];
-	UA [2] = C_UA;
-	UA [3] = UA[1]^UA[2];
-	UA [4] = FLAG;
 
-	write(fd, UA, 5);
+
 
   /*
     O ciclo WHILE deve ser alterado de modo a respeitar o indicado no gui�o

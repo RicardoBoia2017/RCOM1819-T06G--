@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <signal.h>
 
 
 #define BAUDRATE B38400
@@ -27,7 +26,8 @@ unsigned char SETUP[5];
 
 volatile int STOP=FALSE;
 
-void prepareMessage(){ 
+
+void prepareMessage(){
   SETUP[0]=FLAG;
 	SETUP[1]=A;
 	SETUP[2]=C_SET;
@@ -51,7 +51,7 @@ void sendMessage(int fd){
 
 }
 
-int stateValidMessage(int fd,char res[], unsigned char end){
+int stateValidMessage(int fd,char res[]){
   int state=0,aux;
   char readed;
 
@@ -62,8 +62,6 @@ int stateValidMessage(int fd,char res[], unsigned char end){
       exit(-1);
 
     }
-
-
 
     printf("readed=%x state=%d\n",readed,state );
 
@@ -81,7 +79,7 @@ int stateValidMessage(int fd,char res[], unsigned char end){
       break;
       case 2:
               res[1]=readed;
-              if(readed==end){
+              if(readed==C_SET){
                 state=3;
               }else state=0;
       break;
@@ -102,45 +100,6 @@ int stateValidMessage(int fd,char res[], unsigned char end){
 
 
   }
-
   return 0;
 
 }
-
-
-
-
-/*int verifier(int step,unsigned char mess,int id){
-	switch(step)
-	{
-		case 0:
-			if(mess==FLAG)
-				step++;
-		case 1:
-			if(mess==AD)
-				step++;
-			else if(mess!=FLAG)
-						step=0;
-		case 2:
-			if(id==emissor && mess==UA)
-				step++;
-			else if(mess==AD && id==recetor)
-					step++;
-			else if(mess==FLAG)
-					step=1;
-			else
-				step=0;
-		case 3:
-			if(id==emissor && mess==(AD^UA))
-				step++;
-			else if(mess==(AD^AD) && id==recetor)
-					step++;
-			else if(mess==FLAG)
-					step=1;
-			else
-				step=0;
-		case 4:
-			if(mess==FLAG)
-				step++;
-			else
-				step=0;*/

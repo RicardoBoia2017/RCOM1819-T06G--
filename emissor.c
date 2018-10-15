@@ -1,21 +1,8 @@
-/*Non-Canonical Input Processing*/
 #include "utilities.c"
-int flag=1, conta=1;
-
-void atende()                   // atende alarme
-{
-	printf("alarme # %d\n", conta);
-	flag=1;
-	conta++;
-}
-
 
 int main(int argc, char** argv)
 {
     int fd;
-   int flag=1;
-    //unsigned char buf [5];
-    char result_A_C[2];
     struct termios oldtio,newtio;
 
 
@@ -33,7 +20,7 @@ int main(int argc, char** argv)
   */
 
 
-    fd = open(argv[1], O_RDWR | O_NOCTTY);
+    fd = open(argv[1], O_RDWR | O_NOCTTY );
     if (fd <0) {perror(argv[1]); exit(-1); }
 
     if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
@@ -69,22 +56,11 @@ int main(int argc, char** argv)
 
     printf("New termios structure set Noncanonical mode\n");
 
-    (void) signal(SIGALRM, atende);
-
     prepareMessage();
+    sendMessage(fd);
 
-while(conta < 4){
-      
-      sendMessage(fd);
-      alarm(3);
+    printf("%s\n","message sended" );
 
-      //Read something
-	if(stateValidMessage(fd,result_A_C, C_UA) == 0)
-		break;	
-
- //     alarm (0);
-}
-    printf("Vou terminar.\n");
 
   /*
     O ciclo FOR e as instru��es seguintes devem ser alterados de modo a respeitar
