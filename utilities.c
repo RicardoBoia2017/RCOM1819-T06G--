@@ -22,6 +22,7 @@
 #define C_RR 0x05
 #define C_REJ 0x01
 #define BYTE_TO_SEND 5
+#define FINALSTATE 5
 
 unsigned char SETUP[5];
 unsigned char UA[5];
@@ -48,11 +49,10 @@ void prepare_SET_UA(){
 
 
 
-
 void sendMessage(int fd){
   int byteChar=0;
   if(tries==3){
-    printf("%s\n","Fail to send the messag( 3 attemps)" );
+    printf("%s\n","Fail to send the message (3 attemps)" );
     exit(-1);
   }
 
@@ -65,6 +65,7 @@ void sendMessage(int fd){
     printf("%d bytes\n",byteChar);
   }
   tries++;
+
   if(CANCEL==FALSE){
     alarm(3);
   }
@@ -78,7 +79,7 @@ int stateValidMessage(int fd,char res[]){
   int state=0,aux;
   unsigned char reader;
 
-  while(1){
+  while(state!=FINALSTATE){
 
     aux=read(fd,&reader,1);
 
@@ -104,19 +105,18 @@ int stateValidMessage(int fd,char res[]){
       break;
       case 2:
               res[1]=reader;
-              if(reader==SETUP[3]){
+              if(reader==SETUP[2]){
                 state=3;
               }else state=0;
       break;
       case 3:
-              if((SETUP[4])==reader){
+              if((SETUP[3])==reader){
                 state=4;
               }else state=0;
       break;
       case 4:
-              if(reader==SETUP[5]){
+              if(reader==SETUP[4]){
                 state=5;
-                return 0;
               }else state=0;
       break;
 
@@ -130,11 +130,11 @@ int stateValidMessage(int fd,char res[]){
 
 void receiveResponse(int fd){
   int state=0,aux;
-  int finalState=5;
+
 
   unsigned char reader;
 
-  while(state!=finalState){
+  while(state!=FINALSTATE){
 
     aux=read(fd,&reader,1);
     if(aux==-1){
