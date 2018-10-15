@@ -1,8 +1,11 @@
 #include "utilities.c"
 
+  int fd;
+
+
 int main(int argc, char** argv)
 {
-    int fd;
+
     struct termios oldtio,newtio;
 
 
@@ -56,10 +59,14 @@ int main(int argc, char** argv)
 
     printf("New termios structure set Noncanonical mode\n");
 
-    prepareMessage();
-    sendMessage(fd);
+    prepare_SET_UA();
 
+		(void) signal(SIGALRM,sendMessage);
+
+    sendMessage(fd);
     printf("%s\n","message sended" );
+
+		receiveResponse(fd);
 
 
   /*

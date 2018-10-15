@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    int fd;//res;
+    int fd,res;
     struct termios oldtio,newtio;
     //char buf[5];
     char result_A_C[2];
@@ -60,11 +60,17 @@ int main(int argc, char** argv)
     printf("New termios structure set( Noncanonical mode)\n\n");
     printf("Ready to receve messsage\n");
 
+    prepare_SET_UA();
+
     stateValidMessage(fd,result_A_C);
 
-    for(int i=0;i<2;i++){
-        printf("%x\n",result_A_C[i]);
-    }
+    res=write(fd,UA,BYTE_TO_SEND);
+    if(res==-1){
+      perror("write_E");
+    }else printf("Response read");
+
+
+
 
 
     /*for(int i=0;i<BYTE_TO_SEND;i++){
