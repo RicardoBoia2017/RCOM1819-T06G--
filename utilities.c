@@ -30,7 +30,7 @@ int tries=0;
 
 volatile int STOP=FALSE;
 int CANCEL=FALSE;
-
+int  timOut=TRUE;
 
 void prepare_SET_UA(){
   SETUP[0]=FLAG;
@@ -48,27 +48,38 @@ void prepare_SET_UA(){
 }
 
 
+void alrmHanler(int sig){
+timOut=TRUE;
+tries++;
+printf("alarm");
+}
+
+
+
 
 void sendMessage(int fd){
   int byteChar=0;
-  if(tries==3){
+  /*if(tries==3){
     printf("%s\n","Fail to send the message (3 attemps)" );
     exit(-1);
-  }
+  }*/
 
   while (byteChar!=BYTE_TO_SEND) {
+
     byteChar=write(fd,SETUP,BYTE_TO_SEND);
+	printf("%d\n",byteChar);
     if(byteChar==-1){
       perror("write");
       exit(-1);
-    }
+}
+
     printf("%d bytes\n",byteChar);
   }
-  tries++;
 
-  if(CANCEL==FALSE){
+  /*if(CANCEL==FALSE){
     alarm(3);
-  }
+    printf("alarm ");
+  }*/
 
 
 
@@ -78,6 +89,8 @@ int stateValidMessage(int fd,char res[]){
 
   int state=0,aux;
   unsigned char reader;
+
+
 
   while(state!=FINALSTATE){
 
@@ -134,7 +147,7 @@ void receiveResponse(int fd){
 
   unsigned char reader;
 
-  while(state!=FINALSTATE){
+  while(state!=FINALSTATE && timOut==FALSE){
 
     aux=read(fd,&reader,1);
     if(aux==-1){
@@ -143,7 +156,7 @@ void receiveResponse(int fd){
 
     }
 
-    printf("reader=%x state=%d\n",reader,state );
+    //printf("reader=%x state=%d\n",reader,state );
 
     switch (state) {
       case 0:
@@ -180,7 +193,8 @@ void receiveResponse(int fd){
     }
 
   }
-  printf("%s\n","UA was received"  );
-  CANCEL=TRUE;
+  
+  alarm(0);
+  
 
 }
