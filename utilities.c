@@ -94,7 +94,7 @@ int stateValidMessage(int fd,char res[], const unsigned char cmd []){
 
 
 
-  while(state!=FINALSTATE){
+  while(state!=FINALSTATE && timOut == FALSE){
 
     aux=read(fd,&reader,1);
 
@@ -203,8 +203,8 @@ int stateValidMessage(int fd,char res[], const unsigned char cmd []){
     }
 
   }
- */
+ 
 
   
 
-}
+}*/
