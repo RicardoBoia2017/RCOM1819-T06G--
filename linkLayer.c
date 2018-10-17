@@ -49,8 +49,6 @@ void setTermiosStructure (LinkLayer * linkLayer)
 
 void llopenT (LinkLayer * linkLayer)
 {
-    prepare_SET_UA();
-	
     (void) signal(SIGALRM,alrmHanler);
 
     while(tries<3 && timOut==TRUE){
@@ -58,7 +56,7 @@ void llopenT (LinkLayer * linkLayer)
         timOut=FALSE;
 	alarm(3);
     
-	sendMessage(linkLayer->fd);
+	sendMessage(linkLayer->fd, SETUP);
 	receiveResponse(linkLayer->fd);
     }
 		
@@ -74,4 +72,33 @@ void llopenT (LinkLayer * linkLayer)
 void llopenR (LinkLayer * linkLayer)
 {
 	printf ("RECE\n");
+}
+
+void llcloseT (LinkLayer * linkLayer)
+{
+    tries = 0;
+    timOut = TRUE;
+
+    while(tries<3 && timOut==TRUE){
+	
+        timOut=FALSE;
+	alarm(3);
+    
+	sendMessage(linkLayer->fd, DISC);
+
+	receiveResponse(linkLayer->fd);
+    }
+		
+    if(tries==3){
+    	printf("%s\n","Failed to send the message (3 attemps)" );
+    	exit(-1);
+    }
+    else{ 
+	printf("%s\n","UA was received"  );
+   }	
+}
+
+void llcloseR (LinkLayer * linkLayer)
+{
+
 }
