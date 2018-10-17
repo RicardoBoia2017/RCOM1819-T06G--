@@ -75,7 +75,6 @@ void sendMessage(int fd, const unsigned char cmd []){
       perror("write");
       exit(-1);
 }
-    printf("%x \n", cmd);
     printf("%d bytes\n",byteChar);
   }
 
