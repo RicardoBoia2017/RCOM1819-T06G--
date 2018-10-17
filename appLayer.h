@@ -3,6 +3,7 @@
 
 //#include "utilities.h"
 #include "linkLayer.h"
+#include "unistd.h"
 
 typedef enum {TRANSMITTER, RECEIVER} Status;
 
