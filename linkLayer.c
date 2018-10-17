@@ -51,13 +51,18 @@ void llopenT (LinkLayer * linkLayer)
 {
     (void) signal(SIGALRM,alrmHanler);
 
+    char result_A_C[2]; //Tirar isto depois
+
     while(tries<3 && timOut==TRUE){
 	
         timOut=FALSE;
 	alarm(3);
     
 	sendMessage(linkLayer->fd, SETUP);
-	receiveResponse(linkLayer->fd);
+//	receiveResponse(linkLayer->fd);
+	stateValidMessage(linkLayer->fd, result_A_C, UA);
+
+  	alarm(0);
     }
 		
     if(tries==3){
@@ -88,6 +93,7 @@ void llcloseT (LinkLayer * linkLayer)
 {
     tries = 0;
     timOut = TRUE;
+    char result_A_C[2];
 
     while(tries<3 && timOut==TRUE){
 	
@@ -96,7 +102,10 @@ void llcloseT (LinkLayer * linkLayer)
     
 	sendMessage(linkLayer->fd, DISC);
 
-	receiveResponse(linkLayer->fd);
+//	receiveResponse(linkLayer->fd);
+	stateValidMessage(linkLayer->fd, result_A_C, UA);
+
+  	alarm(0);
     }
 		
     if(tries==3){
