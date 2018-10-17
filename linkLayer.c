@@ -71,7 +71,17 @@ void llopenT (LinkLayer * linkLayer)
 
 void llopenR (LinkLayer * linkLayer)
 {
-	printf ("RECE\n");
+    char result_A_C[2];
+
+    stateValidMessage(linkLayer->fd,result_A_C, SETUP);
+
+    sendMessage (linkLayer->fd, UA);
+ /*	write(linkLayer->fd,UA,BYTE_TO_SEND);
+
+    if(write(linkLayer->fd,UA,BYTE_TO_SEND)==-1){
+      perror("write_E");
+    }else
+	 printf("Response read");*/
 }
 
 void llcloseT (LinkLayer * linkLayer)
@@ -100,5 +110,9 @@ void llcloseT (LinkLayer * linkLayer)
 
 void llcloseR (LinkLayer * linkLayer)
 {
+	char result_A_C[2];
 
+	stateValidMessage(linkLayer->fd,result_A_C, DISC);
+
+	sendMessage (linkLayer->fd, UA);
 }
