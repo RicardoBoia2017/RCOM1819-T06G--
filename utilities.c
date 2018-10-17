@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include<signal.h>
+#include <signal.h>
 
 
 #define BAUDRATE B38400
@@ -24,15 +24,19 @@
 #define BYTE_TO_SEND 5
 #define FINALSTATE 5
 
-unsigned char SETUP[5];
-unsigned char UA[5];
+//unsigned char SETUP[5];
+//unsigned char UA[5];
+static const unsigned char SETUP[5] = {FLAG, A, C_SET, A ^ C_SET, FLAG};
+static const unsigned char UA[5] = {FLAG, A, C_UA, A ^ C_UA, FLAG};
+static const unsigned char DISC[5] = {FLAG, A, C_DISC, A ^ C_DISC, FLAG};
+
 int tries=0;
 
 volatile int STOP=FALSE;
 int CANCEL=FALSE;
 int  timOut=TRUE;
 
-void prepare_SET_UA(){
+/*void prepare_SET_UA(){
   SETUP[0]=FLAG;
 	SETUP[1]=A;
 	SETUP[2]=C_SET;
@@ -45,19 +49,18 @@ void prepare_SET_UA(){
   UA[3]=UA[1]^UA[2];
   UA[4]=FLAG;
 
-}
+}*/
 
 
 void alrmHanler(int sig){
-timOut=TRUE;
-tries++;
-printf("alarm");
+   	timOut=TRUE;
+   tries++;
 }
 
 
 
 
-void sendMessage(int fd){
+void sendMessage(int fd, const unsigned char cmd []){
   int byteChar=0;
   /*if(tries==3){
     printf("%s\n","Fail to send the message (3 attemps)" );
@@ -66,13 +69,13 @@ void sendMessage(int fd){
 
   while (byteChar!=BYTE_TO_SEND) {
 
-    byteChar=write(fd,SETUP,BYTE_TO_SEND);
+    byteChar=write(fd,cmd,BYTE_TO_SEND);
 	printf("%d\n",byteChar);
     if(byteChar==-1){
       perror("write");
       exit(-1);
 }
-
+    printf("%x \n", cmd);
     printf("%d bytes\n",byteChar);
   }
 
