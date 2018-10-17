@@ -77,7 +77,7 @@ void llopenT (LinkLayer * linkLayer)
 void llopenR (LinkLayer * linkLayer)
 {
     char result_A_C[2];
-
+        timOut=FALSE;
     stateValidMessage(linkLayer->fd,result_A_C, SETUP);
 
     sendMessage (linkLayer->fd, UA);
@@ -120,7 +120,7 @@ void llcloseT (LinkLayer * linkLayer)
 void llcloseR (LinkLayer * linkLayer)
 {
 	char result_A_C[2];
-
+	timOut = FALSE;
 	stateValidMessage(linkLayer->fd,result_A_C, DISC);
 
 	sendMessage (linkLayer->fd, UA);
