@@ -88,7 +88,7 @@ void sendMessage(int fd, const unsigned char cmd []){
 
 }
 
-int stateValidMessage(int fd,char res[]){
+int stateValidMessage(int fd,char res[], const unsigned char cmd []){
 
   int state=0,aux;
   unsigned char reader;
@@ -109,29 +109,29 @@ int stateValidMessage(int fd,char res[]){
 
     switch (state) {
       case 0:
-              if(reader==SETUP[0]){
+              if(reader==cmd[0]){
                 state=1;
               }else state=0;
       break;
       case 1:
               res[0]=reader;
-              if(reader==SETUP[1]){
+              if(reader==cmd[1]){
                 state=2;
               }else state=0;
       break;
       case 2:
               res[1]=reader;
-              if(reader==SETUP[2]){
+              if(reader==cmd[2]){
                 state=3;
               }else state=0;
       break;
       case 3:
-              if((SETUP[3])==reader){
+              if((cmd[3])==reader){
                 state=4;
               }else state=0;
       break;
       case 4:
-              if(reader==SETUP[4]){
+              if(reader==cmd[4]){
                 state=5;
               }else state=0;
       break;
