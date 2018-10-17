@@ -15,15 +15,18 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 	{
 	case TRANSMITTER:
 		llopenT (linkLayer);
+		sleep(3);
+		llcloseT (linkLayer);
 		break;
 	case RECEIVER: 
 		llopenR (linkLayer);
+		llcloseR (linkLayer);
 		break;
 	}
 
 	sleep(3);
 
-	switch (appLayer->status)
+/*	switch (appLayer->status)
 	{
 	case TRANSMITTER:
 		llcloseT (linkLayer);
@@ -32,4 +35,5 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 		llcloseR (linkLayer);
 		break;
 	}
+*/
 }	
