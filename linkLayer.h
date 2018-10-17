@@ -32,5 +32,7 @@ void openPort (LinkLayer * linkLayer);
 void setTermiosStructure (LinkLayer * linkLayer);
 void llopenT (LinkLayer * linkLayer);
 void llopenR (LinkLayer * linkLayer);
+void llcloseT (LinkLayer * linkLayer);
+void llcloseR (LinkLayer * linkLayer);
 
 #endif
