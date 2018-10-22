@@ -13,5 +13,7 @@ typedef struct {
 
 //void setupAppLayer (ApplicationLayer *appLayer);
 void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer);
+void send (LinkLayer * linkLayer);
+void receive (LinkLayer * linkLayer);
 
 #endif
