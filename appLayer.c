@@ -15,15 +15,24 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 	{
 	case TRANSMITTER:
 		llopenT (linkLayer);
-		sleep(3);
+		send (linkLayer);
 		llcloseT (linkLayer);
 		break;
 	case RECEIVER: 
 		llopenR (linkLayer);
+		receive (linkLayer);
 		llcloseR (linkLayer);
 		break;
 	}
 
-	sleep(3);
-
 }	
+
+void send (LinkLayer * linkLayer)
+{
+	
+}
+
+void receive (LinkLayer * linkLayer)
+{
+
+}
