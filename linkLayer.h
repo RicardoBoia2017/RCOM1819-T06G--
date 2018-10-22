@@ -23,6 +23,9 @@ typedef struct {
 	unsigned int timeout; /*Valor do temporizador: 1 s*/
 	unsigned int numTransmissions;  /*Número de tentativas em caso de falha*/
 	char * frame; //trama
+
+	unsigned int nRR;
+	unsigned int nREJ; 
 } LinkLayer;
 
 struct termios oldtio, newtio; 
@@ -30,9 +33,10 @@ struct termios oldtio, newtio;
 void setupLinkLayer (LinkLayer *linkLayer);
 void openPort (LinkLayer * linkLayer);
 void setTermiosStructure (LinkLayer * linkLayer);
-void llopenT (LinkLayer * linkLayer);
-void llopenR (LinkLayer * linkLayer);
-void llcloseT (LinkLayer * linkLayer);
-void llcloseR (LinkLayer * linkLayer);
+void llopenT (LinkLayer * linkLayer); // Tem que retornar inteiro
+void llopenR (LinkLayer * linkLayer); // Tem que retornar inteiro
+int llwrite (LinkLayer *linkLayer, char * buffer, int lenght);
+void llcloseT (LinkLayer * linkLayer); // Tem que retornar inteiro
+void llcloseR (LinkLayer * linkLayer); // Tem que retornar inteiro
 
 #endif
