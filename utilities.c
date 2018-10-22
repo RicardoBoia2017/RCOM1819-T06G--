@@ -20,11 +20,11 @@
 #define FLAG_S_2 0x5E
 #define FLAG_S_3 0x5D
 
-#define REJ_0 0X01
-#define REJ_1 0X81
+#define C_REJ0 0X01
+#define C_REJ1 0X81
 
-#define RR_0 0X05
-#define RR_0 0X85
+#define C_RR0 0X05
+#define C_RR1 0X85
 
 
 #define A 0x03
