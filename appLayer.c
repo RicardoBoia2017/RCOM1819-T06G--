@@ -26,14 +26,4 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 
 	sleep(3);
 
-/*	switch (appLayer->status)
-	{
-	case TRANSMITTER:
-		llcloseT (linkLayer);
-		break;
-	case RECEIVER: 
-		llcloseR (linkLayer);
-		break;
-	}
-*/
 }	

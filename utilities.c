@@ -14,7 +14,12 @@
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
+
 #define FLAG 0x7E
+#define FLAG_S_1 0x7D
+#define FLAG_S_2 0x5E
+#define FLAG_S_3 0x5D
+
 #define A 0x03
 #define C_SET 0x03
 #define C_DISC 0x0B
@@ -56,8 +61,6 @@ void alrmHanler(int sig){
    	timOut=TRUE;
    tries++;
 }
-
-
 
 
 void sendMessage(int fd, const unsigned char cmd []){
@@ -151,60 +154,17 @@ int stateValidMessage(int fd,char res[], const unsigned char cmd []){
 }
 
 
-/*void receiveResponse(int fd){
-  int state=0,aux;
+void bStuffing(char* messageData,char byte,int* countB,int size){
 
-
-  unsigned char reader;
-
-  while(state!=FINALSTATE && timOut==FALSE){
-
-    aux=read(fd,&reader,1);
-    if(aux==-1){
-      perror("state_read");
-      exit(-1);
-
+    if(byte==FLAG){
+        messageData[4+size+(*countB)]=FLAG_S_1;
+        messageData[4+size+(++(*countB))]=FLAG_S_2;   
+    }else if(byte==FLAG_S_1){
+        messageData[4+size+(*countB)]=FLAG_S_1;
+        messageData[4+size+(++(*countB))]=FLAG_S_3;   
+    }else{
+         messageData[4+size+(*countB)]=byte;
     }
+}
 
-    //printf("reader=%x state=%d\n",reader,state );
 
-    switch (state) {
-      case 0:
-      if(reader==UA[0]){
-        state=1;
-      }else state=0;
-      break;
-      case 1:
-      if(reader==UA[1]){
-        state=2;
-      }else if(reader!=UA[0]){
-        state=0;}
-      break;
-
-      case 2:
-      if(reader==UA[2]){
-        state=3;
-      }else if(reader==UA[0]){
-        state=1;
-      }else state=0;
-      break;
-
-      case 3:
-      if(reader==UA[3]){
-        state=4;
-      }else state=0;
-      break;
-
-      case 4:
-      if(reader==UA[4]){
-        state=5;
-      }else state=0;
-      break;
-    }
-
-  }
- 
-
-  
-
-}*/

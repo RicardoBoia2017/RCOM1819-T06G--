@@ -103,7 +103,7 @@ void llcloseT (LinkLayer * linkLayer)
 	sendMessage(linkLayer->fd, DISC);
 
 //	receiveResponse(linkLayer->fd);
-	stateValidMessage(linkLayer->fd, result_A_C, UA);
+	stateValidMessage(linkLayer->fd, result_A_C, DISC);
 
   	alarm(0);
     }
@@ -113,8 +113,10 @@ void llcloseT (LinkLayer * linkLayer)
     	exit(-1);
     }
     else{ 
-	printf("%s\n","UA was received"  );
-   }	
+	printf("%s\n","DISC was received"  );
+   }
+	
+	sendMessage(linkLayer->fd, UA);	
 }
 
 void llcloseR (LinkLayer * linkLayer)
