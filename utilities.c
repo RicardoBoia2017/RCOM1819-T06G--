@@ -20,17 +20,20 @@
 #define FLAG_S_2 0x5E
 #define FLAG_S_3 0x5D
 
+#define REJ_0 0X01
+#define REJ_1 0X81
+
+#define RR_0 0X05
+#define RR_0 0X85
+
+
 #define A 0x03
 #define C_SET 0x03
 #define C_DISC 0x0B
 #define C_UA 0x07
-#define C_RR 0x05
-#define C_REJ 0x01
 #define BYTE_TO_SEND 5
 #define FINALSTATE 5
 
-//unsigned char SETUP[5];
-//unsigned char UA[5];
 static const unsigned char SETUP[5] = {FLAG, A, C_SET, A ^ C_SET, FLAG};
 static const unsigned char UA[5] = {FLAG, A, C_UA, A ^ C_UA, FLAG};
 static const unsigned char DISC[5] = {FLAG, A, C_DISC, A ^ C_DISC, FLAG};
@@ -40,21 +43,6 @@ int tries=0;
 volatile int STOP=FALSE;
 int CANCEL=FALSE;
 int  timOut=TRUE;
-
-/*void prepare_SET_UA(){
-  SETUP[0]=FLAG;
-	SETUP[1]=A;
-	SETUP[2]=C_SET;
-	SETUP[3]=SETUP[1]^SETUP[2];
-	SETUP[4]=FLAG;
-
-  UA[0]=FLAG;
-  UA[1]=A;
-  UA[2]=C_UA;
-  UA[3]=UA[1]^UA[2];
-  UA[4]=FLAG;
-
-}*/
 
 
 void alrmHanler(int sig){
