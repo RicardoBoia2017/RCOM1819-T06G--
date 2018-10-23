@@ -141,7 +141,7 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
 			linkLayer->nREJ++;
 	}
 
-	else if (linkLayer->sequnceNumber == 0)
+	else if (linkLayer->sequenceNumber == 0)
 	{
 		if (response[2] == C_RR0)
 			linkLayer->nRR++;
@@ -162,6 +162,16 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
 	printf("%s\n","UA was received"  );
    }	
    return 0;
+}
+
+int llread (LinkLayer * linkLayer, char * buffer)
+{
+
+	validateFrame (linkLayer);
+
+	//byteDestuffing
+
+
 }
 	
 void llcloseT (LinkLayer * linkLayer)

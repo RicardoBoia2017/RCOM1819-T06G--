@@ -36,6 +36,7 @@ void setTermiosStructure (LinkLayer * linkLayer);
 void llopenT (LinkLayer * linkLayer); // Tem que retornar inteiro
 void llopenR (LinkLayer * linkLayer); // Tem que retornar inteiro
 int llwrite (LinkLayer *linkLayer, char * buffer, int lenght);
+int llread (LinkLayer * linkLayer, char * buffer);
 void llcloseT (LinkLayer * linkLayer); // Tem que retornar inteiro
 void llcloseR (LinkLayer * linkLayer); // Tem que retornar inteiro
 
