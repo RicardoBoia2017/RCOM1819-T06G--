@@ -1,20 +1,21 @@
 #include "linkLayer.h"
 #include <stdio.h>
 #include "utilities.c"
-
 void setupLinkLayer (LinkLayer * linkLayer)
 {
 	linkLayer->fd = -1;
 	linkLayer->port = "/dev/ttyS0";
-	linkLayer->baudRate =
+	linkLayer->baudRate = 
 	linkLayer->sequenceNumber = 0;
 	linkLayer->timeout = 3;
 	linkLayer->numTransmissions = 3;
 	linkLayer->frame = malloc(MAX_SIZE);
+	
+	linkLayer->fileName = "pinguim.gif";	//Considerar passar o nome do ficheiro por terminal
 
 	linkLayer->nRR = 0;
 	linkLayer->nREJ = 0;
-}
+}	
 
 void openPort (LinkLayer * linkLayer)
 {
@@ -58,22 +59,22 @@ void llopenT (LinkLayer * linkLayer)
     char result_A_C[2]; //Tirar isto depois
 
     while(tries<3 && timOut==TRUE){
-
+	
         timOut=FALSE;
 	alarm(3);
-
+    
 	sendMessage(linkLayer->fd, SETUP);
 //	receiveResponse(linkLayer->fd);
 	stateValidMessage(linkLayer->fd, result_A_C, UA);
 
   	alarm(0);
     }
-
+		
     if(tries==3){
     	printf("%s\n","Failed to send the message (3 attemps)" );
     	exit(-1);
     }
-    else{
+    else{ 
 	printf("%s\n","UA was received"  );
    }
 }
@@ -84,8 +85,9 @@ void llopenR (LinkLayer * linkLayer)
     timOut=FALSE;
 
     stateValidMessage(linkLayer->fd,result_A_C, SETUP);
-
+    printf("SETUP receives\n");
     sendMessage (linkLayer->fd, UA);
+    printf("UA sent\n");
  /*	write(linkLayer->fd,UA,BYTE_TO_SEND);
 
     if(write(linkLayer->fd,UA,BYTE_TO_SEND)==-1){
@@ -97,12 +99,14 @@ void llopenR (LinkLayer * linkLayer)
 int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
 {
    unsigned char * packet = malloc(5 + lenght);
+	tries=0;
+   timOut = TRUE;
 
    packet[0] = FLAG;
    packet[1] = A;
    packet[2] = linkLayer->sequenceNumber << 6;
    packet[3] = packet[1] ^ packet[2];
-
+ 
    memcpy(&packet[4], buffer, lenght);
 
    unsigned char BCC2 = 0;
@@ -111,13 +115,13 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
    for(	; i < lenght; i++)
 	BCC2 ^= buffer[i];
 
-   packet[lenght+4] = BCC2;
+   packet[lenght+4] = BCC2;	  	
    packet[lenght+5] = FLAG;
 
    //byteStuffing
 
    while(tries<3 && timOut==TRUE){
-
+	
         timOut=FALSE;
 	alarm(3);
 
@@ -125,14 +129,14 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
 	{
    	   perror("write");
    	   exit(-1);
-	}
+	}	
 
 //	receiveResponse(linkLayer->fd);
 //	stateValidMessage(linkLayer->fd, result_A_C, UA);
 
 	char response [5];
 	read (linkLayer->fd, response, 5);
-
+	printf("%x", response[0]);
 	if (linkLayer->sequenceNumber == 1)
 	{
 		if (response[2] == C_RR1)
@@ -152,16 +156,16 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
 	}
 
   	alarm(0);
-
+	
     }
-
+		
     if(tries==3){
     	printf("%s\n","Failed to send the message (3 attemps)" );
     	exit(-1);
     }
-    else{
+    else{ 
 	printf("%s\n","UA was received"  );
-   }
+   }	
    return 0;
 }
 
@@ -172,9 +176,9 @@ int llread (LinkLayer * linkLayer, char * buffer)
 
 	//byteDestuffing
 
-
+	
 }
-
+	
 void llcloseT (LinkLayer * linkLayer)
 {
     tries = 0;
@@ -182,30 +186,27 @@ void llcloseT (LinkLayer * linkLayer)
     char result_A_C[2];
 
     while(tries<3 && timOut==TRUE){
-
+	
         timOut=FALSE;
 	alarm(3);
-
+    
 	sendMessage(linkLayer->fd, DISC);
 
 //	receiveResponse(linkLayer->fd);
-
 	stateValidMessage(linkLayer->fd, result_A_C, DISC);
-
 
   	alarm(0);
     }
-
+		
     if(tries==3){
     	printf("%s\n","Failed to send the message (3 attemps)" );
     	exit(-1);
     }
-    else{
+    else{ 
 	printf("%s\n","UA was received"  );
-   }
+   }	
 
    sendMessage(linkLayer->fd, UA);
-
 }
 
 void llcloseR (LinkLayer * linkLayer)
@@ -217,25 +218,25 @@ void llcloseR (LinkLayer * linkLayer)
     (void) signal(SIGALRM,alrmHanler);
 
     stateValidMessage(linkLayer->fd, result_A_C, DISC);
-
+    printf("DISC received\n");
     while(tries<3 && timOut==TRUE){
-
+	
         timOut=FALSE;
 	alarm(3);
-
+    
 	sendMessage(linkLayer->fd, DISC);
-
+  	  printf("DISC sent\n");
 //	receiveResponse(linkLayer->fd);
 	stateValidMessage(linkLayer->fd, result_A_C, UA);
-
+   	printf("UA received\n");
   	alarm(0);
     }
-
+		
     if(tries==3){
     	printf("%s\n","Failed to send the message (3 attemps)" );
     	exit(-1);
     }
-    else{
+    else{ 
 	printf("%s\n","UA was received"  );
    }
 }
