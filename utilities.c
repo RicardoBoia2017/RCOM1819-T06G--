@@ -49,13 +49,7 @@ void alrmHanler(int sig) {
 
 void sendMessage(int fd, const unsigned char cmd[]) {
 	int byteChar = 0;
-<<<<<<< HEAD
-=======
-	/*if(tries==3){
-	 printf("%s\n","Fail to send the message (3 attemps)" );
-	 exit(-1);
-	 }*/
->>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
+
 
 	while (byteChar != BYTE_TO_SEND) {
 
@@ -108,10 +102,9 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[]) {
 			break;
 		case 2:
 			res[1] = reader;
-<<<<<<< HEAD
+
 			printf("Command 2: %0x\n", cmd[2]);
-=======
->>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
+
 			if (reader == cmd[2])
 				state = 3;
 
@@ -119,22 +112,18 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[]) {
 				state = 0;
 			break;
 		case 3:
-<<<<<<< HEAD
+
 
 			if (cmd[3] == reader)
-=======
+
 			if ((cmd[3]) == reader)
->>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
+
 				state = 4;
 
 			else
 				state = 0;
 			break;
 		case 4:
-<<<<<<< HEAD
-
-=======
->>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
 			if (reader == cmd[4])
 				state = 5;
 
