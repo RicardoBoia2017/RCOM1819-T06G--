@@ -31,7 +31,8 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 void send (LinkLayer * linkLayer)
 {
 	char sizeString[16];	
-
+	
+	//Start control packet
 	ControlPacket startCP;	
 	startCP.controlField = 2;
 
@@ -55,8 +56,28 @@ void send (LinkLayer * linkLayer)
 	
 	TLV listParameters [2] = {startTLVSize, startTLVName};
 	startCP.parameters = listParameters;
+ 	
+	clock_t startTime = clock();
 
 	sendControl(linkLayer,&startCP,2);
+
+	//Data packet
+	DataPacket dataPacket;
+	dataPacket.data = malloc(MAX_SIZE);	
+
+
+	//End control packet
+	ControlPacket endCP;
+	endCP = startCP;
+	endCP.controlField = 3;	
+
+ 	tcflush(linkLayer->fd, TCIOFLUSH);
+
+	sendControl(linkLayer,&endCP,2);
+
+	clock_t endTime = clock();
+
+	linkLayer->totalTime = (double) (endTime - startTime)/CLOCKS_PER_SEC;
 }
 
 unsigned int getFileSize (char * fileName)
