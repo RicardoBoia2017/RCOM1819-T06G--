@@ -23,6 +23,8 @@ typedef struct {
 	unsigned int timeout; /*Valor do temporizador: 1 s*/
 	unsigned int numTransmissions;  /*Número de tentativas em caso de falha*/
 	char * frame; //trama
+	
+	char * fileName; //nome do ficheiro
 
 	unsigned int nRR;
 	unsigned int nREJ; 
