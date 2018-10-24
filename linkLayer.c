@@ -15,6 +15,7 @@ void setupLinkLayer (LinkLayer * linkLayer)
 
 	linkLayer->nRR = 0;
 	linkLayer->nREJ = 0;
+	linkLayer->totalTime =0;
 }	
 
 void openPort (LinkLayer * linkLayer)
