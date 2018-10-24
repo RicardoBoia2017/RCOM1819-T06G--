@@ -245,7 +245,7 @@ int validateFrame(LinkLayer * linkLayer) {
 
 
 
-char* stuffing(char* frame,int size){
+unsigned char* stuffing(char* frame,int size){
 	unsigned char * result = malloc(MAX_SIZE);
 	int resultSize=size;
 	int i;
@@ -274,19 +274,25 @@ char* stuffing(char* frame,int size){
 
 		return result;
 
-
-
 }
 
-void bStuffing(char* messageData, char byte, int* countB, int size) {
 
-	if (byte == FLAG) {
-		messageData[4 + size + (*countB)] = ESC;
-		messageData[4 + size + (++(*countB))] = FLAG_S_2;
-	} else if (byte == ESC) {
-		messageData[4 + size + (*countB)] = ESC;
-		messageData[4 + size + (++(*countB))] = FLAG_S_3;
-	} else {
-		messageData[4 + size + (*countB)] = byte;
+
+unsigned char* destuffing(char* frame,int size){
+	int i,j=0;
+	unsigned char * result = malloc(MAX_SIZE);
+
+	for(i=0;i<size;i++){
+
+		if(frame[i]==ESC){
+			result[j]==frame[++i]^0X20;
+		}else{
+				result[j]==frame[i];
+		}
+		j++;
+
 	}
+
+
+	return result;
 }
