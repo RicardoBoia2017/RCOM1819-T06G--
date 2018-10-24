@@ -189,10 +189,14 @@ void llcloseT (LinkLayer * linkLayer)
 
 //	receiveResponse(linkLayer->fd);
 <<<<<<< HEAD
+<<<<<<< HEAD
 	stateValidMessage(linkLayer->fd, result_A_C, DISC);
 =======
 	stateValidMessage(linkLayer->fd, result_A_C, UA);
 >>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
+=======
+	stateValidMessage(linkLayer->fd, result_A_C, DISC);
+>>>>>>> 2e69d83749201bbd3ac6c3714a354bf0fe78d027
 
   	alarm(0);
     }
@@ -206,10 +210,14 @@ void llcloseT (LinkLayer * linkLayer)
    }	
 
 <<<<<<< HEAD
+<<<<<<< HEAD
    sendMessage(linkLayer->fd, UA);
 =======
    sendMessage(linkLayer->fd, DISC);
 >>>>>>> 159aa070f7b17a7db5aeddb8cbd78b9f2a6c743f
+=======
+   sendMessage(linkLayer->fd, UA);
+>>>>>>> 2e69d83749201bbd3ac6c3714a354bf0fe78d027
 }
 
 void llcloseR (LinkLayer * linkLayer)
