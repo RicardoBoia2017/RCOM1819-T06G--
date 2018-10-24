@@ -1,48 +1,46 @@
-#ifndef APPLAYER_H
-#define APPLAYER_H
+#ifndef LINKLAYER_H
+#define LINKLAYER_H
 
-//#include "utilities.h"
-#include "linkLayer.h"
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <strings.h>
+#include <signal.h>
+#include <time.h>
 
-#define MAX_SIZE 255 //talvez esteja mal
 
-typedef enum {TRANSMITTER, RECEIVER} Status;
 
-typedef struct {
-	Status status;
-} ApplicationLayer;
-
-typedef struct {
-
-	unsigned int type;
-	unsigned char lenght;
-	char * value;
-
-} TLV;
+#define BAUDRATE B38400
 
 typedef struct {
 
-	unsigned int controlField;
-	TLV* parameters;
+	int fd; //Descritor de ficheiro
+	char *port; /*Dispositivo /dev/ttySx, x = 0, 1*/
+	int baudRate; /*Velocidade de transmissão*/
+	unsigned int sequenceNumber; /*Número de sequência da trama: 0, 1*/  
+	unsigned int timeout; /*Valor do temporizador: 1 s*/
+	unsigned int numTransmissions;  /*Número de tentativas em caso de falha*/
+	char * frame; //trama
 	
-} ControlPacket;
+	char * fileName; //nome do ficheiro
 
-typedef struct {
+	unsigned int nRR;
+	unsigned int nREJ; 
+	double totalTime;
+} LinkLayer;
 
-	unsigned int controlField;
-	unsigned int sequenceNumber;
-	unsigned int nOctets;
-	char * data;
-} DataPacket; 
+struct termios oldtio, newtio; 
 
-//void setupAppLayer (ApplicationLayer *appLayer);
-void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer);
-unsigned int getFileSize (char * fileName);
-void send (LinkLayer * linkLayer);
-void receive (LinkLayer * linkLayer);
-int sendControl(LinkLayer * linkLayer, ControlPacket * controlPacket,int nParameters);
+void setupLinkLayer (LinkLayer *linkLayer);
+void openPort (LinkLayer * linkLayer);
+void setTermiosStructure (LinkLayer * linkLayer);
+void llopenT (LinkLayer * linkLayer); // Tem que retornar inteiro
+void llopenR (LinkLayer * linkLayer); // Tem que retornar inteiro
+int llwrite (LinkLayer *linkLayer, char * buffer, int lenght);
+int llread (LinkLayer * linkLayer, char * buffer);
+void llcloseT (LinkLayer * linkLayer); // Tem que retornar inteiro
+void llcloseR (LinkLayer * linkLayer); // Tem que retornar inteiro
 
 #endif
