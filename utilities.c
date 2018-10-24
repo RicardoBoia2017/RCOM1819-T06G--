@@ -32,6 +32,8 @@
 #define BYTE_TO_SEND 5
 #define FINALSTATE 5
 
+
+
 static const unsigned char SETUP[5] = { FLAG, A, C_SET, A ^ C_SET, FLAG };
 static const unsigned char UA[5] = { FLAG, A, C_UA, A ^ C_UA, FLAG };
 static const unsigned char DISC[5] = { FLAG, A, C_DISC, A ^ C_DISC, FLAG };
@@ -46,6 +48,29 @@ void alrmHanler(int sig) {
 	timOut = TRUE;
 	tries++;
 }
+
+
+FILE* openFile(int type ,char* filePath){
+
+    FILE* result;
+
+    if(type==RECEIVER){
+     result=fopen(filePath,"rb");
+    }else{
+      result=fopen(filePath,"wb");
+    }
+
+    if(result==NULL){
+       perror("error to open the file ");
+
+     }
+   return result;
+}
+
+
+
+
+
 
 void sendMessage(int fd, const unsigned char cmd[]) {
 	int byteChar = 0;
@@ -228,4 +253,3 @@ void bStuffing(char* messageData, char byte, int* countB, int size) {
 		messageData[4 + size + (*countB)] = byte;
 	}
 }
-
