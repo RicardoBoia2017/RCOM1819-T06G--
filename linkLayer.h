@@ -8,10 +8,10 @@
 #include <termios.h>
 #include <strings.h>
 #include <signal.h>
+#include <time.h>
 
 
 
-#define MAX_SIZE 256 //talvez esteja mal
 #define BAUDRATE B38400
 
 typedef struct {
@@ -28,6 +28,7 @@ typedef struct {
 
 	unsigned int nRR;
 	unsigned int nREJ; 
+	double totalTime;
 } LinkLayer;
 
 struct termios oldtio, newtio; 
