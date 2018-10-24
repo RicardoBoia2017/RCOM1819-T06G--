@@ -20,18 +20,18 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 		send (linkLayer);
 		llcloseT (linkLayer);
 		break;
-	case RECEIVER: 
+	case         : 
 		llopenR (linkLayer);
 		receive (linkLayer);
 		llcloseR (linkLayer);
 		break;
 	}
 
-}	
+}
 
 void send (LinkLayer * linkLayer)
 {
-	
+
 }
 
 void receive (LinkLayer * linkLayer)
