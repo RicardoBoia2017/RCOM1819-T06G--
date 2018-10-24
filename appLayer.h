@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define MAX_SIZE 255 //talvez esteja mal
+
 typedef enum {TRANSMITTER, RECEIVER} Status;
 
 typedef struct {
