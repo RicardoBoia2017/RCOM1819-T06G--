@@ -15,7 +15,7 @@
 #define TRUE 1
 
 #define FLAG 0x7E
-#define FLAG_S_1 0x7D
+#define ESC 0x7D
 #define FLAG_S_2 0x5E
 #define FLAG_S_3 0x5D
 
@@ -31,6 +31,8 @@
 #define C_UA 0x07
 #define BYTE_TO_SEND 5
 #define FINALSTATE 5
+
+
 
 
 
@@ -54,7 +56,7 @@ FILE* openFile(int type ,char* filePath){
 
     FILE* result;
 
-    if(type==RECEIVER){
+    if(type==0){
      result=fopen(filePath,"rb");
     }else{
       result=fopen(filePath,"wb");
@@ -64,6 +66,7 @@ FILE* openFile(int type ,char* filePath){
        perror("error to open the file ");
 
      }
+
    return result;
 }
 
@@ -127,8 +130,6 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[]) {
 			break;
 		case 2:
 			res[1] = reader;
-
-			printf("Command 2: %0x\n", cmd[2]);
 
 			if (reader == cmd[2])
 				state = 3;
@@ -241,13 +242,49 @@ int validateFrame(LinkLayer * linkLayer) {
 	return 0;
 }
 
+
+
+
+char* stuffing(char* frame,int size){
+	unsigned char * result = malloc(MAX_SIZE);
+	int resultSize=size;
+	int i;
+
+	for(i=1;i<(size-1);i++){
+		if(frame[i]==FLAG || frame[i]==ESC){
+			resultSize++;
+		}
+	}
+	result[0]=frame[0];
+	int j=1;
+
+	for(i=1;i<(size-1);i++){
+			if(frame[i]==FLAG || frame[i]==ESC){
+				result[j]=ESC;
+				result[++j]=frame[i]^0X20;
+
+			}else{
+				result[j]=frame[i];
+			}
+			j++;
+
+	}
+
+		result[j]=frame[i];
+
+		return result;
+
+
+
+}
+
 void bStuffing(char* messageData, char byte, int* countB, int size) {
 
 	if (byte == FLAG) {
-		messageData[4 + size + (*countB)] = FLAG_S_1;
+		messageData[4 + size + (*countB)] = ESC;
 		messageData[4 + size + (++(*countB))] = FLAG_S_2;
-	} else if (byte == FLAG_S_1) {
-		messageData[4 + size + (*countB)] = FLAG_S_1;
+	} else if (byte == ESC) {
+		messageData[4 + size + (*countB)] = ESC;
 		messageData[4 + size + (++(*countB))] = FLAG_S_3;
 	} else {
 		messageData[4 + size + (*countB)] = byte;
