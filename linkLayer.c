@@ -177,7 +177,8 @@ int llread (LinkLayer * linkLayer, char * buffer)
 
 	//byteDestuffing
 
-	
+	//mudar para numero de bytes lidos
+	return 0;
 }
 	
 void llcloseT (LinkLayer * linkLayer)
