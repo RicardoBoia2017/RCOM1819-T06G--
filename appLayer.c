@@ -15,13 +15,13 @@ void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-//		llopenT (linkLayer);
-		send (linkLayer);
-//		llcloseT (linkLayer);
+		llopenT (linkLayer);
+//		send (linkLayer);
+		llcloseT (linkLayer);
 		break;
 	case RECEIVER: 
 		llopenR (linkLayer);
-		receive (linkLayer);
+//		receive (linkLayer);
 		llcloseR (linkLayer);
 		break;
 	}
@@ -42,7 +42,7 @@ void send (LinkLayer * linkLayer)
 	startTLVName.type = 1;
 	startTLVName.lenght = strlen(linkLayer->fileName);
 	startTLVName.value = linkLayer->fileName;	
-	printf("%d %s\n", startTLVName.lenght, startTLVName.value);	
+
 	//control packet size
  	TLV startTLVSize;
 
@@ -165,25 +165,38 @@ int sendData(LinkLayer * linkLayer, char * buffer, int size, int sequenceNumber)
 
 void receive (LinkLayer * linkLayer)
 {
+	int size;
+	unsigned int fileSize, index = 0;
+	char * fileName;
+	clock_t startTime = clock();
 	//Start control packet
-	
-	char* buffer = malloc(MAX_SIZE);
-	int size = llread(linkLayer, buffer);
+//	char* buffer = malloc(MAX_SIZE);
+	size = llread(linkLayer);
 
-	int index = 0;
-
-	TLV startParameters[2];
-	
-	int j = 1;
-	for(j; j < 2; j++)
+	// receives start control packet
+	while (index < size)
 	{
-		startParameters[j].type = frame[index++];
-		startParameters[j].lenght = frame[index++];	
+		unsigned int type = linkLayer->frame[index++];
+		unsigned char lenght = linkLayer->frame[index++];	
+		char * value;
+		memcpy(value, &linkLayer->frame[index], lenght);	
 
-		memcpy(startParameters[j].value, &linkLayer->frame[index], startParameters[j].length);	
+		if (type == 0) //size
+		{
+			fileSize = atoi(value);
+		}
 
-		if (startParameters.type == 0) //size
-			fileSize = startParameters[j].value;
+		else if (type == 1) //name
+		{
+			fileName = malloc(lenght);
+			memcpy(fileName, value, lenght);
+		}
+	}
 
-	}	
+	FILE* file = fopen(linkLayer->fileName,"wb");; //Mudar isto e colocar função das utilities
+
+
 }
+
+
+

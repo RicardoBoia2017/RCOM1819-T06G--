@@ -240,7 +240,7 @@ int validateFrame(LinkLayer * linkLayer) {
 		}
 	}
 
-	return 0;
+	return 5 + index; //2 * F + A + C + BCC1 + index (Dados + BCC2)
 }
 
 

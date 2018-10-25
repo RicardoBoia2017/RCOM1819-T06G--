@@ -170,15 +170,15 @@ int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
    return 0;
 }
 
-int llread (LinkLayer * linkLayer, char * buffer)
+int llread (LinkLayer * linkLayer)
 {
 
-	validateFrame (linkLayer);
+	int size = validateFrame (linkLayer);
 
-	//byteDestuffing
+	//byteDestuffing que vai alterar size
 
-	//mudar para numero de bytes lidos
-	return 0;
+
+	return size;
 }
 	
 void llcloseT (LinkLayer * linkLayer)

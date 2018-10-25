@@ -45,6 +45,5 @@ void send (LinkLayer * linkLayer);
 int sendControl(LinkLayer * linkLayer, ControlPacket * controlPacket,int nParameters);
 int sendData(LinkLayer * linkLayer, char * buffer, int size, int sequenceNumber);
 void receive (LinkLayer * linkLayer);
-//void receiveControl(
 
 #endif
