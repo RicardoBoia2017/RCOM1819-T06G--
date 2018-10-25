@@ -44,5 +44,6 @@ unsigned int getFileSize (char * fileName);
 void send (LinkLayer * linkLayer);
 void receive (LinkLayer * linkLayer);
 int sendControl(LinkLayer * linkLayer, ControlPacket * controlPacket,int nParameters);
+int sendData(LinkLayer * linkLayer, char * buffer, int size);
 
 #endif

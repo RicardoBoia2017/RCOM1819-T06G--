@@ -62,9 +62,14 @@ void send (LinkLayer * linkLayer)
 	sendControl(linkLayer,&startCP,2);
 
 	//Data packet
-	DataPacket dataPacket;
-	dataPacket.data = malloc(MAX_SIZE);	
 
+	FILE* file; //Colocar open file
+
+	DataPacket dataPacket;
+	dataPacket.data = malloc(fileSize);
+	int nBytesRead = 0;
+	while((nBytesRead = fread(dataPacket.data, sizeof(char), fileSize, file)) > 0)
+		sendData(linkLayer, dataPacket.data, nBytesRead);
 
 	//End control packet
 	ControlPacket endCP;
@@ -117,6 +122,11 @@ int sendControl(LinkLayer * linkLayer, ControlPacket * controlPacket,int nParame
 	}		
 
 	return 0;
+}
+
+int sendData(LinkLayer * linkLayer, char * buffer, int size)
+{
+
 }
 
 

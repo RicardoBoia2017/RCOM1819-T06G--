@@ -8,6 +8,7 @@
 #include <string.h>
 #include <signal.h>
 
+#define MAX_SIZE 255 //talvez esteja mal
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
