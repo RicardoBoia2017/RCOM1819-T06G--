@@ -173,17 +173,17 @@ void receive(LinkLayer *linkLayer)
 	// receives start control packet
 	while (index < size)
 	{
-		unsigned int type = linkLayer->frame[index++];
-		unsigned char lenght = linkLayer->frame[index++];
-		char *value;
+		unsigned int type = linkLayer->frame[index++]; //0 = size, 1 = name
+		unsigned char lenght = linkLayer->frame[index++]; //size of file
+		char *value; // either size or name, according to type
 		memcpy(value, &linkLayer->frame[index], lenght);
 
-		if (type == 0) //size
+		if (type == 0) //stores size of file in fileSize
 		{
 			fileSize = atoi(value);
 		}
 
-		else if (type == 1) //name
+		else if (type == 1) //stores name of file in fileNAme
 		{
 			fileName = malloc(lenght);
 			memcpy(fileName, value, lenght);
@@ -194,5 +194,55 @@ void receive(LinkLayer *linkLayer)
 
 	while (1)
 	{
+		char * data;
+		int C_packet, C_data, N, L1, L2, lenght;
+
+		size = llread (linkLayer);
+
+		if (size < 0)
+		{
+			printf ("llread error\n");
+			exit(-1);
+		}
+		// frame[0] = FLAG
+		// frame[1] = A
+		// frame[2] = C da trama, não dos dados 
+		// frame[3] = BBC1
+		// A partir do 4 começa dos dados
+		C_data = linkLayer->frame[4];
+
+
+		if (C_data == 3) //receives end control packet
+			break;
+
+		else if (C_data != 1) 
+		{
+			printf ("receive: packet received not expected\n");
+			exit(-1);
+		}
+
+		N = linkLayer->frame[5];
+		L2 = linkLayer->frame[6];
+		L1 = linkLayer->frame[7];
+
+		lenght = 256 * L2 + L1;
+
+		C_packet = linkLayer->frame[2]; 
+
+		//TODO verificar sequence e BCC2  
+
+
+		memcpy (data, &linkLayer->frame[8], lenght);
+
 	}
+}
+
+int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data)
+{
+	
+
+
+
+
+
 }

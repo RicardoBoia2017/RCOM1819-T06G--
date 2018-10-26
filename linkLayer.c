@@ -2,37 +2,37 @@
 #include <stdio.h>
 #include "utilities.c"
 
-void setupLinkLayer (LinkLayer * linkLayer)
+void setupLinkLayer(LinkLayer *linkLayer)
 {
-	linkLayer->fd = -1;
-	linkLayer->port = "/dev/ttyS0";
-	linkLayer->baudRate = 
-	linkLayer->sequenceNumber = 0;
-	linkLayer->timeout = 3;
-	linkLayer->numTransmissions = 3;
-	linkLayer->frame = malloc(MAX_SIZE);
-	
-	linkLayer->fileName = "pinguim.gif";	//Considerar passar o nome do ficheiro por terminal
+    linkLayer->fd = -1;
+    linkLayer->port = "/dev/ttyS0";
+    linkLayer->baudRate =
+        linkLayer->sequenceNumber = 0;
+    linkLayer->timeout = 3;
+    linkLayer->numTransmissions = 3;
+    linkLayer->frame = malloc(MAX_SIZE);
 
-	linkLayer->nRR = 0;
-	linkLayer->nREJ = 0;
-	linkLayer->totalTime =0;
-}	
+    linkLayer->fileName = "pinguim.gif"; //Considerar passar o nome do ficheiro por terminal
 
-void openPort (LinkLayer * linkLayer)
-{
-	linkLayer->fd = open (linkLayer->port, O_RDWR | O_NOCTTY); //port = /dev/ttyS0
-
-	if (linkLayer->fd == -1)
-		perror ("openPort");
-
+    linkLayer->nRR = 0;
+    linkLayer->nREJ = 0;
+    linkLayer->totalTime = 0;
 }
 
-void setTermiosStructure (LinkLayer * linkLayer)
+void openPort(LinkLayer *linkLayer)
 {
-    if ( tcgetattr(linkLayer->fd,&oldtio) == -1) { /* save current port settings */
-      perror("setTermiosStructure");
-      exit(-1);
+    linkLayer->fd = open(linkLayer->port, O_RDWR | O_NOCTTY); //port = /dev/ttyS0
+
+    if (linkLayer->fd == -1)
+        perror("openPort");
+}
+
+void setTermiosStructure(LinkLayer *linkLayer)
+{
+    if (tcgetattr(linkLayer->fd, &oldtio) == -1)
+    { /* save current port settings */
+        perror("setTermiosStructure");
+        exit(-1);
     }
 
     bzero(&newtio, sizeof(newtio));
@@ -42,55 +42,58 @@ void setTermiosStructure (LinkLayer * linkLayer)
 
     newtio.c_lflag = 0;
 
-    newtio.c_cc[VTIME]    = 1;   /* inter-character timer unused */
-    newtio.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
+    newtio.c_cc[VTIME] = 1; /* inter-character timer unused */
+    newtio.c_cc[VMIN] = 0;  /* blocking read until 5 chars received */
 
     tcflush(linkLayer->fd, TCIOFLUSH);
 
-    if ( tcsetattr(linkLayer->fd,TCSANOW,&newtio) == -1) {
-      perror("tcsetattr");
-      exit(-1);
+    if (tcsetattr(linkLayer->fd, TCSANOW, &newtio) == -1)
+    {
+        perror("tcsetattr");
+        exit(-1);
     }
-
 }
 
-void llopenT (LinkLayer * linkLayer)
+void llopenT(LinkLayer *linkLayer)
 {
-    (void) signal(SIGALRM,alrmHanler);
+    (void)signal(SIGALRM, alrmHanler);
 
     char result_A_C[2]; //Tirar isto depois
 
-    while(tries<3 && timOut==TRUE){
-	
-        timOut=FALSE;
-	alarm(3);
-    
-	sendMessage(linkLayer->fd, SETUP);
-//	receiveResponse(linkLayer->fd);
-	stateValidMessage(linkLayer->fd, result_A_C, UA);
+    while (tries < 3 && timOut == TRUE)
+    {
 
-  	alarm(0);
+        timOut = FALSE;
+        alarm(3);
+
+        sendMessage(linkLayer->fd, SETUP);
+        //	receiveResponse(linkLayer->fd);
+        stateValidMessage(linkLayer->fd, result_A_C, UA);
+
+        alarm(0);
     }
-		
-    if(tries==3){
-    	printf("%s\n","Failed to send the message (3 attemps)" );
-    	exit(-1);
+
+    if (tries == 3)
+    {
+        printf("%s\n", "Failed to send the message (3 attemps)");
+        exit(-1);
     }
-    else{ 
-	printf("%s\n","UA was received"  );
-   }
+    else
+    {
+        printf("%s\n", "UA was received");
+    }
 }
 
-void llopenR (LinkLayer * linkLayer)
+void llopenR(LinkLayer *linkLayer)
 {
     char result_A_C[2];
-    timOut=FALSE;
+    timOut = FALSE;
 
-    stateValidMessage(linkLayer->fd,result_A_C, SETUP);
+    stateValidMessage(linkLayer->fd, result_A_C, SETUP);
     printf("SETUP receives\n");
-    sendMessage (linkLayer->fd, UA);
+    sendMessage(linkLayer->fd, UA);
     printf("UA sent\n");
- /*	write(linkLayer->fd,UA,BYTE_TO_SEND);
+    /*	write(linkLayer->fd,UA,BYTE_TO_SEND);
 
     if(write(linkLayer->fd,UA,BYTE_TO_SEND)==-1){
       perror("write_E");
@@ -98,148 +101,154 @@ void llopenR (LinkLayer * linkLayer)
 	 printf("Response read");*/
 }
 
-int llwrite (LinkLayer *linkLayer, char * buffer, int lenght)
+int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 {
-   unsigned char * packet = malloc(5 + lenght);
-	tries=0;
-   timOut = TRUE;
+    unsigned char *packet = malloc(5 + lenght);
+    tries = 0;
+    timOut = TRUE;
 
-   packet[0] = FLAG;
-   packet[1] = A;
-   packet[2] = linkLayer->sequenceNumber << 6;
-   packet[3] = packet[1] ^ packet[2];
- 
-   memcpy(&packet[4], buffer, lenght);
+    packet[0] = FLAG;
+    packet[1] = A;
+    packet[2] = linkLayer->sequenceNumber << 6;
+    packet[3] = packet[1] ^ packet[2];
 
-   unsigned char BCC2 = 0;
-   int i = 0;
+    memcpy(&packet[4], buffer, lenght);
 
-   for(	; i < lenght; i++)
-	BCC2 ^= buffer[i];
+    unsigned char BCC2 = 0;
+    int i = 0;
 
-   packet[lenght+4] = BCC2;	  	
-   packet[lenght+5] = FLAG;
+    for (; i < lenght; i++)
+        BCC2 ^= buffer[i];
 
-   //byteStuffing
+    packet[lenght + 4] = BCC2;
+    packet[lenght + 5] = FLAG;
 
-   while(tries<3 && timOut==TRUE){
-	
-        timOut=FALSE;
-	alarm(3);
+    //byteStuffing
 
-	if (write (linkLayer->fd, packet, lenght + 6) < 0)
-	{
-   	   perror("write");
-   	   exit(-1);
-	}	
+    while (tries < 3 && timOut == TRUE)
+    {
 
-//	receiveResponse(linkLayer->fd);
-//	stateValidMessage(linkLayer->fd, result_A_C, UA);
+        timOut = FALSE;
+        alarm(3);
 
-	char response [5];
-	read (linkLayer->fd, response, 5);
-	printf("%x", response[0]);
-	if (linkLayer->sequenceNumber == 1)
-	{
-		if (response[2] == C_RR1)
-			linkLayer->nRR++;
+        if (write(linkLayer->fd, packet, lenght + 6) < 0)
+        {
+            perror("write");
+            exit(-1);
+        }
 
-		else if(response[2] == C_REJ1)
-			linkLayer->nREJ++;
-	}
+        //	receiveResponse(linkLayer->fd);
+        //	stateValidMessage(linkLayer->fd, result_A_C, UA);
 
-	else if (linkLayer->sequenceNumber == 0)
-	{
-		if (response[2] == C_RR0)
-			linkLayer->nRR++;
+        char response[5];
+        read(linkLayer->fd, response, 5);
+        printf("%x", response[0]);
+        if (linkLayer->sequenceNumber == 1)
+        {
+            if (response[2] == C_RR1)
+                linkLayer->nRR++;
 
-		else if(response[2] == C_REJ0)
-			linkLayer->nREJ++;
-	}
+            else if (response[2] == C_REJ1)
+                linkLayer->nREJ++;
+        }
 
-  	alarm(0);
-	
+        else if (linkLayer->sequenceNumber == 0)
+        {
+            if (response[2] == C_RR0)
+                linkLayer->nRR++;
+
+            else if (response[2] == C_REJ0)
+                linkLayer->nREJ++;
+        }
+
+        alarm(0);
     }
-		
-    if(tries==3){
-    	printf("%s\n","Failed to send the message (3 attemps)" );
-    	exit(-1);
+
+    if (tries == 3)
+    {
+        printf("%s\n", "Failed to send the message (3 attemps)");
+        exit(-1);
     }
-    else{ 
-	printf("%s\n","UA was received"  );
-   }	
-   return 0;
+    else
+    {
+        printf("%s\n", "UA was received");
+    }
+    return 0;
 }
 
-int llread (LinkLayer * linkLayer)
+int llread(LinkLayer *linkLayer)
 {
+    int size = validateFrame(linkLayer);
 
-	int size = validateFrame (linkLayer);
+    //byteDestuffing que vai alterar size
 
-	//byteDestuffing que vai alterar size
-
-
-	return size;
+    return size;
 }
-	
-void llcloseT (LinkLayer * linkLayer)
+
+void llcloseT(LinkLayer *linkLayer)
 {
     tries = 0;
     timOut = TRUE;
     char result_A_C[2];
 
-    while(tries<3 && timOut==TRUE){
-	
-        timOut=FALSE;
-	alarm(3);
-    
-	sendMessage(linkLayer->fd, DISC);
+    while (tries < 3 && timOut == TRUE)
+    {
 
-//	receiveResponse(linkLayer->fd);
-	stateValidMessage(linkLayer->fd, result_A_C, DISC);
+        timOut = FALSE;
+        alarm(3);
 
-  	alarm(0);
+        sendMessage(linkLayer->fd, DISC);
+
+        //	receiveResponse(linkLayer->fd);
+        stateValidMessage(linkLayer->fd, result_A_C, DISC);
+
+        alarm(0);
     }
-		
-    if(tries==3){
-    	printf("%s\n","Failed to send the message (3 attemps)" );
-    	exit(-1);
-    }
-    else{ 
-	printf("%s\n","UA was received"  );
-   }	
 
-   sendMessage(linkLayer->fd, UA);
+    if (tries == 3)
+    {
+        printf("%s\n", "Failed to send the message (3 attemps)");
+        exit(-1);
+    }
+    else
+    {
+        printf("%s\n", "UA was received");
+    }
+
+    sendMessage(linkLayer->fd, UA);
 }
 
-void llcloseR (LinkLayer * linkLayer)
+void llcloseR(LinkLayer *linkLayer)
 {
     tries = 0;
     timOut = TRUE;
     char result_A_C[2];
 
-    (void) signal(SIGALRM,alrmHanler);
+    (void)signal(SIGALRM, alrmHanler);
 
     stateValidMessage(linkLayer->fd, result_A_C, DISC);
     printf("DISC received\n");
-    while(tries<3 && timOut==TRUE){
-	
-        timOut=FALSE;
-	alarm(3);
-    
-	sendMessage(linkLayer->fd, DISC);
-  	  printf("DISC sent\n");
-//	receiveResponse(linkLayer->fd);
-	stateValidMessage(linkLayer->fd, result_A_C, UA);
-   	printf("UA received\n");
-  	alarm(0);
+    while (tries < 3 && timOut == TRUE)
+    {
+
+        timOut = FALSE;
+        alarm(3);
+
+        sendMessage(linkLayer->fd, DISC);
+        printf("DISC sent\n");
+        //	receiveResponse(linkLayer->fd);
+        stateValidMessage(linkLayer->fd, result_A_C, UA);
+        printf("UA received\n");
+        alarm(0);
     }
-		
-    if(tries==3){
-    	printf("%s\n","Failed to send the message (3 attemps)" );
-    	exit(-1);
+
+    if (tries == 3)
+    {
+        printf("%s\n", "Failed to send the message (3 attemps)");
+        exit(-1);
     }
-    else{ 
-	printf("%s\n","UA was received"  );
-   }
+    else
+    {
+        printf("%s\n", "UA was received");
+    }
 }

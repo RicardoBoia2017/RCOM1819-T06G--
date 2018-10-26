@@ -9,41 +9,44 @@
 
 #define MAX_SIZE 255 //talvez esteja mal
 
-typedef enum {TRANSMITTER, RECEIVER} Status;
+typedef enum
+{
+	TRANSMITTER,
+	RECEIVER
+} Status;
 
-typedef struct {
+typedef struct
+{
 	Status status;
 } ApplicationLayer;
 
-typedef struct {
-
+typedef struct
+{
 	unsigned int type;
 	unsigned char lenght;
-	char * value;
-
+	char *value;
 } TLV;
 
-typedef struct {
-
+typedef struct
+{
 	unsigned int controlField;
-	TLV* parameters;
-	
+	TLV *parameters;
 } ControlPacket;
 
-typedef struct {
-
+typedef struct
+{
 	unsigned int controlField;
 	unsigned int sequenceNumber;
 	unsigned int nOctets;
-	char * data;
-} DataPacket; 
+	char *data;
+} DataPacket;
 
 //void setupAppLayer (ApplicationLayer *appLayer);
-void startAppLayer (LinkLayer *linkLayer, ApplicationLayer * appLayer);
-unsigned int getFileSize (char * fileName);
-void send (LinkLayer * linkLayer);
-int sendControl(LinkLayer * linkLayer, ControlPacket * controlPacket,int nParameters);
-int sendData(LinkLayer * linkLayer, char * buffer, int size, int sequenceNumber);
-void receive (LinkLayer * linkLayer);
-
+void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer);
+unsigned int getFileSize(char *fileName);
+void send(LinkLayer *linkLayer);
+int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters);
+int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber);
+void receive(LinkLayer *linkLayer);
+int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data);
 #endif
