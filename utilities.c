@@ -1,57 +1,20 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <signal.h>
-
-#define MAX_SIZE 255 //talvez esteja mal
-#define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS1"
-#define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define FALSE 0
-#define TRUE 1
-
-#define FLAG 0x7E
-#define ESC 0x7D
-#define FLAG_S_2 0x5E
-#define FLAG_S_3 0x5D
-
-#define C_REJ0 0X01
-#define C_REJ1 0X81
-
-#define C_RR0 0X05
-#define C_RR1 0X85
-
-#define A 0x03
-#define C_SET 0x03
-#define C_DISC 0x0B
-#define C_UA 0x07
-#define BYTE_TO_SEND 5
-#define FINALSTATE 5
-
-
-
-
-
-static const unsigned char SETUP[5] = { FLAG, A, C_SET, A ^ C_SET, FLAG };
-static const unsigned char UA[5] = { FLAG, A, C_UA, A ^ C_UA, FLAG };
-static const unsigned char DISC[5] = { FLAG, A, C_DISC, A ^ C_DISC, FLAG };
-
-int tries = 0;
+#include "utilities.h"
 
 volatile int STOP = FALSE;
 int CANCEL = FALSE;
-int timOut = TRUE;
+
+int timeOut = TRUE;
 
 void alrmHanler(int sig) {
-	timOut = TRUE;
-	tries++;
+	timeOut = TRUE;
 }
 
+void setTimeOut (int value)
+{
+    timeOut = value;
+}
+
+int getTimeOut () {return timeOut;}
 
 FILE* openFile(int type ,char* filePath){
 
@@ -70,11 +33,6 @@ FILE* openFile(int type ,char* filePath){
 
    return result;
 }
-
-
-
-
-
 
 void sendMessage(int fd, const unsigned char cmd[]) {
 	int byteChar = 0;
@@ -103,7 +61,7 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[]) {
 	int state = 0, aux;
 	unsigned char reader;
 
-	while (state != FINALSTATE && timOut == FALSE) {
+	while (state != FINALSTATE && timeOut == FALSE) {
 
 		aux = read(fd, &reader, 1);
 
@@ -165,26 +123,25 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[]) {
 
 }
 
-int validateFrame(LinkLayer * linkLayer) {
+int validateFrame(int fd, char * frame) {
 
 	int state = 0, bytesRead, index=0;
 	unsigned char reader;
-
-	while (state != FINALSTATE && timOut == FALSE) {
-
-		bytesRead = read(linkLayer->fd, &reader, 1);
+	while (state != FINALSTATE && timeOut == FALSE) {
+		bytesRead = read(fd, &reader, 1);
 
 		if (bytesRead == -1) {
 			perror("validateFrame");
 			exit(-1);
 		}
+		printf("reader=%x state=%d\n", reader, state);
 
 		switch (state) {
 
 		case 0: //start
 			if (reader == FLAG)
 			{
-				linkLayer->frame[0] = reader;
+				frame[0] = reader;
 				state = 1;
 			}
 			break;
@@ -192,7 +149,7 @@ int validateFrame(LinkLayer * linkLayer) {
 		case 1: //flag
 			if (reader == A)
 			{
-				linkLayer->frame[1] = reader;
+				frame[1] = reader;
 				state = 2;
 			}
 
@@ -204,7 +161,7 @@ int validateFrame(LinkLayer * linkLayer) {
 
 			if (reader == 0 || reader == (1 << 6) )
 			{
-				linkLayer->frame[2] == reader;
+				frame[2] == reader;
 				state = 3;
 			}
 
@@ -216,9 +173,9 @@ int validateFrame(LinkLayer * linkLayer) {
 			break;
 
 		case 3: //C
-			if ((linkLayer->frame[1] ^ linkLayer->frame[2]) == reader)
+			if ((frame[1] ^ frame[2]) == reader)
 			{
-				linkLayer->frame[3] == reader;
+				frame[3] == reader;
 				state = 4;
 			}
 
@@ -230,7 +187,7 @@ int validateFrame(LinkLayer * linkLayer) {
 			break;
 
 		case 4: //BCC
-			linkLayer->frame[4 + index] == reader; //Vai colocando dados até encontrar flag
+			frame[4 + index] == reader; //Vai colocando dados até encontrar flag
 			index++;
 			if (reader == FLAG)
 				state = 5;
@@ -242,9 +199,6 @@ int validateFrame(LinkLayer * linkLayer) {
 
 	return 5 + index; //2 * F + A + C + BCC1 + index (Dados + BCC2)
 }
-
-
-
 
 unsigned char* stuffing(char* frame,int size){
 	unsigned char * result = malloc(MAX_SIZE);

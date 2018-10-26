@@ -1,6 +1,9 @@
 #include "linkLayer.h"
 #include <stdio.h>
-#include "utilities.c"
+//#include "utilities.c"
+
+//int tries1 = 0;
+///int timOut1 = TRUE;
 
 void setupLinkLayer(LinkLayer *linkLayer)
 {
@@ -56,14 +59,16 @@ void setTermiosStructure(LinkLayer *linkLayer)
 
 void llopenT(LinkLayer *linkLayer)
 {
+    int tries = 0;
+
     (void)signal(SIGALRM, alrmHanler);
 
     char result_A_C[2]; //Tirar isto depois
 
-    while (tries < 3 && timOut == TRUE)
+    while (tries < 3 && getTimeOut() == TRUE)
     {
 
-        timOut = FALSE;
+        setTimeOut(FALSE);
         alarm(3);
 
         sendMessage(linkLayer->fd, SETUP);
@@ -87,7 +92,7 @@ void llopenT(LinkLayer *linkLayer)
 void llopenR(LinkLayer *linkLayer)
 {
     char result_A_C[2];
-    timOut = FALSE;
+    setTimeOut(FALSE);
 
     stateValidMessage(linkLayer->fd, result_A_C, SETUP);
     printf("SETUP receives\n");
@@ -103,9 +108,12 @@ void llopenR(LinkLayer *linkLayer)
 
 int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 {
+
+    (void)signal(SIGALRM, alrmHanler); //TIRAR DEPOIS
+
     unsigned char *packet = malloc(5 + lenght);
-    tries = 0;
-    timOut = TRUE;
+    int tries = 0;
+    setTimeOut(TRUE);
 
     packet[0] = FLAG;
     packet[1] = A;
@@ -125,10 +133,10 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 
     //byteStuffing
 
-    while (tries < 3 && timOut == TRUE)
+    while (tries < 3 && getTimeOut() == TRUE)
     {
-
-        timOut = FALSE;
+        printf("Entrou\n");
+        setTimeOut(FALSE);
         alarm(3);
 
         if (write(linkLayer->fd, packet, lenght + 6) < 0)
@@ -137,12 +145,21 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
             exit(-1);
         }
 
-        //	receiveResponse(linkLayer->fd);
-        //	stateValidMessage(linkLayer->fd, result_A_C, UA);
-
         char response[5];
-        read(linkLayer->fd, response, 5);
-        printf("%x", response[0]);
+        int r = 0;
+
+        //TODO TIRAR ISTO QUANDO MAQUINA DE ESTADOS DE RR E REJ ESTIVER FEITA
+        while (1)
+        {
+            printf("%d\n", r);
+            if ((r = read(linkLayer->fd, response, 5)) > 0)
+            {
+                printf("Break\n");
+                setTimeOut(FALSE);
+                break;
+            }
+        }
+
         if (linkLayer->sequenceNumber == 1)
         {
             if (response[2] == C_RR1)
@@ -178,23 +195,27 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 
 int llread(LinkLayer *linkLayer)
 {
-    int size = validateFrame(linkLayer);
+    setTimeOut(FALSE);
 
+    int size = validateFrame(linkLayer->fd, linkLayer->frame);
+    printf("%x\n", linkLayer->frame[0]);
     //byteDestuffing que vai alterar size
+
+    //TODO BBC2 verification (não sei se antes ou depois do stuffing)
 
     return size;
 }
 
 void llcloseT(LinkLayer *linkLayer)
 {
-    tries = 0;
-    timOut = TRUE;
+    int tries = 0;
+    setTimeOut (TRUE);
     char result_A_C[2];
 
-    while (tries < 3 && timOut == TRUE)
+    while (tries < 3 && getTimeOut() == TRUE)
     {
 
-        timOut = FALSE;
+        setTimeOut (FALSE);
         alarm(3);
 
         sendMessage(linkLayer->fd, DISC);
@@ -220,18 +241,18 @@ void llcloseT(LinkLayer *linkLayer)
 
 void llcloseR(LinkLayer *linkLayer)
 {
-    tries = 0;
-    timOut = TRUE;
+    int tries = 0;
+    setTimeOut (TRUE);
     char result_A_C[2];
 
     (void)signal(SIGALRM, alrmHanler);
 
     stateValidMessage(linkLayer->fd, result_A_C, DISC);
     printf("DISC received\n");
-    while (tries < 3 && timOut == TRUE)
+    while (tries < 3 && getTimeOut() == TRUE)
     {
 
-        timOut = FALSE;
+        setTimeOut (FALSE);
         alarm(3);
 
         sendMessage(linkLayer->fd, DISC);

@@ -15,14 +15,14 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-		llopenT(linkLayer);
-		//		send (linkLayer);
-		llcloseT(linkLayer);
+		//llopenT(linkLayer);
+		send (linkLayer);
+		//llcloseT(linkLayer);
 		break;
 	case RECEIVER:
-		llopenR(linkLayer);
-		//		receive (linkLayer);
-		llcloseR(linkLayer);
+		//llopenR(linkLayer);
+		receive (linkLayer);
+		//llcloseR(linkLayer);
 		break;
 	}
 }
@@ -60,6 +60,7 @@ void send(LinkLayer *linkLayer)
 
 	sendControl(linkLayer, &startCP, 2);
 
+/*
 	//Data packet
 
 	FILE *file = fopen(linkLayer->fileName, "rb");
@@ -90,7 +91,7 @@ void send(LinkLayer *linkLayer)
 
 	tcflush(linkLayer->fd, TCIOFLUSH);
 
-	sendControl(linkLayer, &endCP, 2);
+	sendControl(linkLayer, &endCP, 2);*/
 
 	clock_t endTime = clock();
 
@@ -169,13 +170,12 @@ void receive(LinkLayer *linkLayer)
 	//Start control packet
 	//	char* buffer = malloc(MAX_SIZE);
 	size = llread(linkLayer);
-
 	// receives start control packet
 	while (index < size)
 	{
 		unsigned int type = linkLayer->frame[index++]; //0 = size, 1 = name
 		unsigned char lenght = linkLayer->frame[index++]; //size of file
-		char *value; // either size or name, according to type
+		char *value = malloc(lenght); // either size or name, according to type
 		memcpy(value, &linkLayer->frame[index], lenght);
 
 		if (type == 0) //stores size of file in fileSize
@@ -189,8 +189,24 @@ void receive(LinkLayer *linkLayer)
 			memcpy(fileName, value, lenght);
 		}
 	}
+	
+	sendMessage(linkLayer->fd, RR0);
 
-	FILE *file = fopen(fileName, "wb"); //Mudar isto e colocar função das utilities
+	/*int byteChar = 0;
+
+
+	while (byteChar != 5) {
+
+		byteChar = write(linkLayer->fd, RR0, 5);
+		printf("%d\n", byteChar);
+		if (byteChar == -1) {
+			perror("write");
+			exit(-1);
+		}
+		printf("%d bytes\n", byteChar);
+	}	*/
+	
+	/*FILE *file = fopen(fileName, "wb"); //Mudar isto e colocar função das utilities
 
 	while (1)
 	{
@@ -234,7 +250,7 @@ void receive(LinkLayer *linkLayer)
 
 		memcpy (data, &linkLayer->frame[8], lenght);
 
-	}
+	}*/
 }
 
 int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data)

@@ -1,7 +1,6 @@
 #ifndef APPLAYER_H
 #define APPLAYER_H
 
-//#include "utilities.h"
 #include "linkLayer.h"
 #include <unistd.h>
 #include <stdio.h>
