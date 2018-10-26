@@ -168,9 +168,10 @@ void receive(LinkLayer *linkLayer)
 	char *fileName;
 	clock_t startTime = clock();
 	//Start control packet
+
 	//	char* buffer = malloc(MAX_SIZE);
 	size = llread(linkLayer);
-	// receives start control packet
+
 	while (index < size)
 	{
 		unsigned int type = linkLayer->frame[index++]; //0 = size, 1 = name
@@ -189,9 +190,9 @@ void receive(LinkLayer *linkLayer)
 			memcpy(fileName, value, lenght);
 		}
 	}
-	
-	sendMessage(linkLayer->fd, RR0);
 
+	sendMessage(linkLayer->fd, RR0);
+	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 	/*int byteChar = 0;
 
 
