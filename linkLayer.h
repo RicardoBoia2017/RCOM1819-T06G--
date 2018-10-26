@@ -14,8 +14,8 @@
 
 #define BAUDRATE B38400
 
-typedef struct {
-
+typedef struct 
+{
 	int fd; //Descritor de ficheiro
 	char *port; /*Dispositivo /dev/ttySx, x = 0, 1*/
 	int baudRate; /*Velocidade de transmissão*/

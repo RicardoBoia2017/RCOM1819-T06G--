@@ -1,6 +1,7 @@
 #include "linkLayer.h"
 #include <stdio.h>
 #include "utilities.c"
+
 void setupLinkLayer (LinkLayer * linkLayer)
 {
 	linkLayer->fd = -1;
