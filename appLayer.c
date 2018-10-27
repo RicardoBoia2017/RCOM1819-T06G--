@@ -15,14 +15,14 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-		//llopenT(linkLayer);
+		llopenT(linkLayer);
 		send (linkLayer);
-		//llcloseT(linkLayer);
+		llcloseT(linkLayer);
 		break;
 	case RECEIVER:
-		//llopenR(linkLayer);
+		llopenR(linkLayer);
 		receive (linkLayer);
-		//llcloseR(linkLayer);
+		llcloseR(linkLayer);
 		break;
 	}
 }
@@ -60,30 +60,31 @@ void send(LinkLayer *linkLayer)
 
 	sendControl(linkLayer, &startCP, 2);
 
-/*
+
 	//Data packet
 
-	FILE *file = fopen(linkLayer->fileName, "rb");
-	; //Mudar isto e colocar função das utilities
+	FILE *file = openFile(1, linkLayer->fileName);
+	
+	/*
+	//DataPacket dataPacket;
+	//dataPacket.data = malloc(fileSize);
+	unsigned char* fileData = (unsigned char*) malloc(fileSize);
+	int nBytesRead = 0, sequenceNumber = 0;
 
-	DataPacket dataPacket;
-	dataPacket.data = malloc(fileSize);
-	int nBytesRead = 0;
-	int sequenceNumber = 0;
-	while ((nBytesRead = fread(dataPacket.data, sizeof(char), MAX_SIZE, file)) > 0)
+	while ((nBytesRead = fread(fileData, sizeof(unsigned char),fileSize , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
-		//		printf("%d\n", nBytesRead);
-		sendData(linkLayer, dataPacket.data, nBytesRead, sequenceNumber++ % 255);
+		printf("%d\n", nBytesRead);
+		sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
 
-		memset(dataPacket.data, 0, 255);
+		memset(fileData, 0, 255);
 		if (linkLayer->sequenceNumber)
 			linkLayer->sequenceNumber = 0;
 		else
 			linkLayer->sequenceNumber = 1;
 	}
-
-	//close file
-
+	*/
+	closeFile(file);
+	
 	//End control packet
 	ControlPacket endCP;
 	endCP = startCP;
@@ -91,14 +92,14 @@ void send(LinkLayer *linkLayer)
 
 	tcflush(linkLayer->fd, TCIOFLUSH);
 
-	sendControl(linkLayer, &endCP, 2);*/
+	sendControl(linkLayer, &endCP, 2);
 
 	clock_t endTime = clock();
 
 	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
 }
 
-unsigned int getFileSize(char *fileName)
+unsigned int getFileSize(char *fileName) //TODO meter nas utilities
 {
 	struct stat st;
 	if (stat(fileName, &st) < 0)
@@ -106,6 +107,7 @@ unsigned int getFileSize(char *fileName)
 		perror("getFileSize");
 		exit(-1);
 	}
+
 	return st.st_size;
 }
 
@@ -145,7 +147,7 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	L2 = size % 256;
 
 	packetSize = 4 + size;
-	char frame[packetSize];
+	char * frame = malloc (packetSize);
 
 	frame[0] = 1;
 	frame[1] = sequenceNumber;
@@ -179,6 +181,7 @@ void receive(LinkLayer *linkLayer)
 		unsigned int type = linkLayer->frame[index++]; //0 = size, 1 = name
 		unsigned char lenght = linkLayer->frame[index++]; //size of file
 		char *value = malloc(lenght); // either size or name, according to type
+
 		memcpy(value, &linkLayer->frame[index], lenght);
 
 		if (type == 0) //stores size of file in fileSize
@@ -191,30 +194,22 @@ void receive(LinkLayer *linkLayer)
 			fileName = malloc(lenght);
 			memcpy(fileName, value, lenght);
 		}
+
+		index += lenght;
 	}
 
-	sendMessage(linkLayer->fd, RR0);
+	printf("Received start control packet.\n");
+	sendMessage(linkLayer->fd, RR0); //TODO esta mensagem varia
+
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
-	/*int byteChar = 0;
-
-
-	while (byteChar != 5) {
-
-		byteChar = write(linkLayer->fd, RR0, 5);
-		printf("%d\n", byteChar);
-		if (byteChar == -1) {
-			perror("write");
-			exit(-1);
-		}
-		printf("%d bytes\n", byteChar);
-	}	*/
 	
-	/*FILE *file = fopen(fileName, "wb"); //Mudar isto e colocar função das utilities
+	printf("File size: %d File Name: %s\n",fileSize,  fileName);
+	FILE *file = openFile(0, fileName); //Mudar isto e colocar função das utilities
 
 	while (1)
 	{
-		char * data;
-		int C_packet, C_data, N, L1, L2, lenght;
+		//char * data;
+		int C_data;//, C_packet, N, L1, L2, lenght;
 
 		size = llread (linkLayer);
 
@@ -223,6 +218,7 @@ void receive(LinkLayer *linkLayer)
 			printf ("llread error\n");
 			exit(-1);
 		}
+
 		// frame[0] = FLAG
 		// frame[1] = A
 		// frame[2] = C da trama, não dos dados 
@@ -232,9 +228,14 @@ void receive(LinkLayer *linkLayer)
 
 
 		if (C_data == 3) //receives end control packet
-			break;
+		{
+			printf("Received end control packet.\n");
 
-		else if (C_data != 1) 
+			sendMessage(linkLayer->fd, RR0); //Só para testes
+			break;
+		}
+
+		/*else if (C_data != 1) 
 		{
 			printf ("receive: packet received not expected\n");
 			exit(-1);
@@ -252,8 +253,8 @@ void receive(LinkLayer *linkLayer)
 
 
 		memcpy (data, &linkLayer->frame[8], lenght);
-
-	}*/
+	*/
+	}
 
 	
 	clock_t endTime = clock();

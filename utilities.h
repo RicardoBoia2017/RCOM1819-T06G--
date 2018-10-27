@@ -50,6 +50,7 @@ void alrmHanler(int sig);
 void setTimeOut (int value);
 int getTimeOut ();
 FILE* openFile(int type ,char* filePath);
+void closeFile(FILE * file);
 void sendMessage(int fd, const unsigned char cmd[]);
 int stateValidMessage(int fd, char res[], const unsigned char cmd[]);
 int validateFrame(int fd, char * frame);

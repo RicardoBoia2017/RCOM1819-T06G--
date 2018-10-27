@@ -19,24 +19,29 @@ int getTimeOut() { return timeOut; }
 
 FILE *openFile(int type, char *filePath)
 {
-
 	FILE *result;
 
 	if (type == 0)
-	{
-		result = fopen(filePath, "rb");
-	}
-	else
-	{
 		result = fopen(filePath, "wb");
-	}
+
+	else
+		result = fopen(filePath, "rb");
 
 	if (result == NULL)
 	{
 		perror("error to open the file ");
+		exit(-1);
 	}
-
 	return result;
+}
+
+void closeFile(FILE *file)
+{
+	if (fclose (file) != 0)
+	{
+		perror("closeFile");
+		exit(-1);
+	}
 }
 
 void sendMessage(int fd, const unsigned char cmd[])
@@ -47,19 +52,15 @@ void sendMessage(int fd, const unsigned char cmd[])
 	{
 
 		byteChar = write(fd, cmd, BYTE_TO_SEND);
-		printf("%d\n", byteChar);
+
 		if (byteChar == -1)
 		{
-			perror("write");
+			perror("sendMessage");
 			exit(-1);
 		}
-		printf("%d bytes\n", byteChar);
+
 	}
 
-	/*if(CANCEL==FALSE){
-	 alarm(3);
-	 printf("alarm ");
-	 }*/
 }
 
 int stateValidMessage(int fd, char res[], const unsigned char cmd[])
@@ -141,7 +142,7 @@ int validateFrame(int fd, char *frame)
 			perror("validateFrame");
 			exit(-1);
 		}
-		printf("reader=%x state=%d\n", reader, state);
+		//printf("reader=%x state=%d\n", reader, state);
 
 		switch (state)
 		{

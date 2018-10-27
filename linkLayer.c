@@ -131,11 +131,11 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
     packet[lenght + 4] = BCC2;
     packet[lenght + 5] = FLAG;
 
-    //byteStuffing
+    //TODO byteStuffing
 
     while (tries < 3 && getTimeOut() == TRUE)
     {
-        printf("Entrou\n");
+        //printf("Entrou\n");
         setTimeOut(FALSE);
         alarm(3);
 
@@ -148,10 +148,10 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
         char response[5];
         int r = 0;
 
-        //TODO TIRAR ISTO QUANDO MAQUINA DE ESTADOS DE RR E REJ ESTIVER FEITA
+       //TODO TIRAR ISTO QUANDO MAQUINA DE ESTADOS DE RR E REJ ESTIVER FEITA
         while (1)
         {
-            printf("%d\n", r);
+         //   printf("%d\n", r);
             if ((r = read(linkLayer->fd, response, 5)) > 0)
             {
                 printf("Break\n");
