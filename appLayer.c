@@ -1,11 +1,6 @@
 #include "appLayer.h"
 //#include "utilities.c"
 
-/*void setupAppLayer (ApplicationLayer * appLayer) //TODO deve ser para acrescentar mais
-{
-	appLayer->fd = -1;
-}*/
-
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 {
 	openPort(linkLayer); //abre serial port /dev/ttyS0 para leitura e escrita
@@ -15,13 +10,13 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-		llopenT(linkLayer);
-		send (linkLayer);
+		//llopenT(linkLayer);
+		//send (linkLayer);
 		llcloseT(linkLayer);
 		break;
 	case RECEIVER:
-		llopenR(linkLayer);
-		receive (linkLayer);
+	//	llopenR(linkLayer);
+	//	receive (linkLayer);
 		llcloseR(linkLayer);
 		break;
 	}
@@ -97,18 +92,6 @@ void send(LinkLayer *linkLayer)
 	clock_t endTime = clock();
 
 	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
-}
-
-unsigned int getFileSize(char *fileName) //TODO meter nas utilities
-{
-	struct stat st;
-	if (stat(fileName, &st) < 0)
-	{
-		perror("getFileSize");
-		exit(-1);
-	}
-
-	return st.st_size;
 }
 
 int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters)
@@ -204,7 +187,7 @@ void receive(LinkLayer *linkLayer)
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 	
 	printf("File size: %d File Name: %s\n",fileSize,  fileName);
-	FILE *file = openFile(0, fileName); //Mudar isto e colocar função das utilities
+	FILE *file = openFile(1, fileName); //Mudar isto e colocar função das utilities
 
 	while (1)
 	{

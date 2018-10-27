@@ -4,11 +4,17 @@ volatile int STOP = FALSE;
 int CANCEL = FALSE;
 
 int timeOut = TRUE;
+int tries = 0;
 
 void alrmHanler(int sig)
 {
 	timeOut = TRUE;
+	tries++;
 }
+
+void resetTries() {tries = 0;}
+
+int outOfTries (int maxTries) { return tries >= maxTries; }
 
 void setTimeOut(int value)
 {
@@ -30,7 +36,7 @@ FILE *openFile(int type, char *filePath)
 	if (result == NULL)
 	{
 		perror("error to open the file ");
-		exit(-1);
+		exit (-1);
 	}
 	return result;
 }
@@ -42,6 +48,19 @@ void closeFile(FILE *file)
 		perror("closeFile");
 		exit(-1);
 	}
+}
+
+
+unsigned int getFileSize(char *fileName)
+{
+	struct stat st;
+	if (stat(fileName, &st) < 0)
+	{
+		perror("getFileSize");
+		exit(-1);
+	}
+
+	return st.st_size;
 }
 
 void sendMessage(int fd, const unsigned char cmd[])

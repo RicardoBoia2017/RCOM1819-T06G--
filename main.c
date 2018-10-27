@@ -4,11 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/*void setupLinkLayer (LinkLayer * linkLayer)
-{
-
-}
-*/
 int main(int argc, char *argv[]) {
 
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
