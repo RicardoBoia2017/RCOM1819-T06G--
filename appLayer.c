@@ -111,12 +111,12 @@ unsigned int getFileSize(char *fileName)
 
 int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters)
 {
-	unsigned int i = 0, packetSize = 1, index = 1;
+	unsigned int i, packetSize = 1, index = 1;
 
-	for (i; i < nParameters; i++)
+	for (i = 0; i < nParameters; i++)
 		packetSize += 2 + controlPacket->parameters[i].lenght;
 
-	unsigned char frame[packetSize];
+	char frame[packetSize];
 	frame[0] = controlPacket->controlField; //conversão de inteiro para char (pode estar errado)
 
 	for (i = 0; i < nParameters; i++)
@@ -145,7 +145,7 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	L2 = size % 256;
 
 	packetSize = 4 + size;
-	unsigned char frame[packetSize];
+	char frame[packetSize];
 
 	frame[0] = 1;
 	frame[1] = sequenceNumber;
@@ -159,6 +159,8 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 		perror("llwrite");
 		exit(-1);
 	}
+
+	return 0;
 }
 
 void receive(LinkLayer *linkLayer)
@@ -252,6 +254,11 @@ void receive(LinkLayer *linkLayer)
 		memcpy (data, &linkLayer->frame[8], lenght);
 
 	}*/
+
+	
+	clock_t endTime = clock();
+
+	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
 }
 
 int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data)
@@ -261,5 +268,5 @@ int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data)
 
 
 
-
+	return 0;
 }
