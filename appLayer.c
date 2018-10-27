@@ -65,7 +65,7 @@ void send(LinkLayer *linkLayer)
 
 	FILE *file = openFile(1, linkLayer->fileName);
 	
-	/*
+	
 	//DataPacket dataPacket;
 	//dataPacket.data = malloc(fileSize);
 	unsigned char* fileData = (unsigned char*) malloc(fileSize);
@@ -74,7 +74,7 @@ void send(LinkLayer *linkLayer)
 	while ((nBytesRead = fread(fileData, sizeof(unsigned char),fileSize , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
 		printf("%d\n", nBytesRead);
-		sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
+		//sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
 
 		memset(fileData, 0, 255);
 		if (linkLayer->sequenceNumber)
@@ -82,7 +82,7 @@ void send(LinkLayer *linkLayer)
 		else
 			linkLayer->sequenceNumber = 1;
 	}
-	*/
+	
 	closeFile(file);
 	
 	//End control packet
