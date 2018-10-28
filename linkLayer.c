@@ -104,7 +104,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 
     (void)signal(SIGALRM, alrmHanler); //TIRAR DEPOIS
 
-    char *packet = malloc(6 + lenght);
+    char *packet = malloc(12000);
     int tries = 0;
     setTimeOut(TRUE);
 
@@ -124,7 +124,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
     packet[lenght + 4] = BCC2;
     packet[lenght + 5] = FLAG;
 
-    //stuffing(packet, lenght + 6);
+    int newLenght = stuffing(packet, lenght + 6);
 
     while (tries < 3 && getTimeOut() == TRUE)
     {
@@ -132,7 +132,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
         setTimeOut(FALSE);
         alarm(3);
 
-        if (write(linkLayer->fd, packet, 255) < 0)
+        if (write(linkLayer->fd, packet, 6 + newLenght) < 0)
         {
             perror("write");
             exit(-1);
@@ -192,8 +192,7 @@ int llread(LinkLayer *linkLayer)
 
     int size = validateFrame(linkLayer->fd, linkLayer->frame);
 
-   // size = destuffing(linkLayer->frame, size);
-    //TODO BBC2 verification (não sei se antes ou depois do stuffing)
+    size = destuffing(linkLayer->frame, size);
 
     return size;
 }

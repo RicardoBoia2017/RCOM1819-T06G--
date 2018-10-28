@@ -234,12 +234,8 @@ void receive(LinkLayer *linkLayer)
 		L1 = 216;
 		//L1 = linkLayer->frame[7];
 
-		int i;
-		for (i = 0; i < 10; i++)
-			printf("frame[%d] = %d\n", i, linkLayer->frame[i]);
-
 		lenght = 256 * L2 + L1;
-		printf("256 * %d + %d = %d\n", L2, L1, lenght);
+
 		C_packet = linkLayer->frame[2]; //que contém sequence number
 
 		//TODO verificar sequence e BCC2  
@@ -256,12 +252,11 @@ void receive(LinkLayer *linkLayer)
 		}
 		
 		data = malloc(lenght);
-		printf("251\n");
+
 		memcpy (data, &linkLayer->frame[8], lenght);
-		printf("253\n");
 
 		fwrite (data, sizeof(char), lenght, file);
-		free(data);
+	//	free(data);
 
 		linkLayer->nRR++;
 		if(linkLayer)

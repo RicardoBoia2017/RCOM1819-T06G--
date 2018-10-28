@@ -150,7 +150,7 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[])
 int validateFrame(int fd, char *frame)
 {
 
-	int state = 0, bytesRead, index = 0;
+	int state = 0, bytesRead, dataSize = 0;
 	unsigned char reader;
 	while (state != FINALSTATE && timeOut == FALSE)
 	{
@@ -214,9 +214,9 @@ int validateFrame(int fd, char *frame)
 				state = 0;
 			break;
 
-		case 4:						   //BCC
-			frame[4 + index] = reader; //Vai colocando dados até encontrar flag
-			index++;
+		case 4:	 //BCC
+			frame[4 + dataSize] = reader; //Vai colocando dados até encontrar flag
+			dataSize++;
 			if (reader == FLAG)
 				state = 5;
 
@@ -224,12 +224,12 @@ int validateFrame(int fd, char *frame)
 		}
 	}
 
-	return 5 + index; //2 * F + A + C + BCC1 + index (Dados + BCC2)
+	return 4 + dataSize; // F + A + C + BCC1 + dataSize (Dados + BCC2 +)
 }
 
 int stuffing(char *frame, int size)
 {
-	char *result = malloc(MAX_SIZE);
+	char *result = malloc(20000);
 	int resultSize = size;
 	int i;
 
@@ -258,20 +258,27 @@ int stuffing(char *frame, int size)
 	}
 
 	result[j] = frame[i];
-
-	frame = result;
-
+	frame = realloc(frame, size + resultSize - size);
+	memcpy(frame, result, resultSize);
 	return resultSize;
 }
 
-char *  destuffing(char *frame, int size)
+int destuffing(char *frame, int size)
 {
 	int i, j = 0;
-	char *result = malloc(MAX_SIZE);
+	char *result = malloc(20000);
+	int resultSize = size;
+
+	for (i = 1; i < (size - 1); i++)
+	{
+		if (frame[i] == ESC)
+		{
+			resultSize--;
+		}
+	}
 
 	for (i = 0; i < size; i++)
 	{
-
 		if (frame[i] == ESC)
 		{
 			result[j] = frame[++i] ^ 0X20;
@@ -282,9 +289,7 @@ char *  destuffing(char *frame, int size)
 		}
 		j++;
 	}
+	memcpy(frame, result, resultSize);
 
-	frame = result;
-
-	return result;
-	//return resultSize;
+	return resultSize;
 }
