@@ -189,6 +189,10 @@ int llread(LinkLayer *linkLayer)
     int size = validateFrame(linkLayer->fd, linkLayer->frame);
 
     size = destuffing(linkLayer->frame, size);
+//TODO BBC2 verification (é depois do bytedestuffing)
+    /* se frame[frame_lenght-3] for igual ao bytesuff
+        faz-se destuff
+        se nao BccReceived=frame[frame_lenght-2]*/
 
     return size;
 }
@@ -259,4 +263,15 @@ void llcloseR(LinkLayer *linkLayer)
     {
         printf("%s\n", "UA was received");
     }
+}
+
+int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received){
+    unsigned char expected=0;
+
+    unsigned int i =0;
+    for(i;i<packetSize;i++){
+        expected ^=packet[i];
+    }
+
+    return(expected==received);
 }
