@@ -227,9 +227,9 @@ int validateFrame(int fd, char *frame)
 	return 5 + index; //2 * F + A + C + BCC1 + index (Dados + BCC2)
 }
 
-unsigned char *stuffing(char *frame, int size)
+int stuffing(char *frame, int size)
 {
-	unsigned char *result = malloc(MAX_SIZE);
+	char *result = malloc(MAX_SIZE);
 	int resultSize = size;
 	int i;
 
@@ -259,13 +259,15 @@ unsigned char *stuffing(char *frame, int size)
 
 	result[j] = frame[i];
 
-	return result;
+	frame = result;
+
+	return resultSize;
 }
 
-unsigned char *destuffing(char *frame, int size)
+char *  destuffing(char *frame, int size)
 {
 	int i, j = 0;
-	unsigned char *result = malloc(MAX_SIZE);
+	char *result = malloc(MAX_SIZE);
 
 	for (i = 0; i < size; i++)
 	{
@@ -281,5 +283,8 @@ unsigned char *destuffing(char *frame, int size)
 		j++;
 	}
 
+	frame = result;
+
 	return result;
+	//return resultSize;
 }

@@ -10,14 +10,14 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-		//llopenT(linkLayer);
-		//send (linkLayer);
-		llcloseT(linkLayer);
+	//llopenT(linkLayer);
+		send (linkLayer);
+	//	llcloseT(linkLayer);
 		break;
 	case RECEIVER:
 	//	llopenR(linkLayer);
-	//	receive (linkLayer);
-		llcloseR(linkLayer);
+		receive (linkLayer);
+	//	llcloseR(linkLayer);
 		break;
 	}
 }
@@ -63,13 +63,12 @@ void send(LinkLayer *linkLayer)
 	
 	//DataPacket dataPacket;
 	//dataPacket.data = malloc(fileSize);
-	unsigned char* fileData = (unsigned char*) malloc(fileSize);
+	char* fileData = (char*) malloc(fileSize);
 	int nBytesRead = 0, sequenceNumber = 0;
 
 	while ((nBytesRead = fread(fileData, sizeof(unsigned char),fileSize , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
-		printf("%d\n", nBytesRead);
-		//sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
+		sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
 
 		memset(fileData, 0, 255);
 		if (linkLayer->sequenceNumber)
@@ -78,6 +77,7 @@ void send(LinkLayer *linkLayer)
 			linkLayer->sequenceNumber = 1;
 	}
 	
+	free(fileData);
 	closeFile(file);
 	
 	//End control packet
@@ -123,11 +123,12 @@ int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParamet
 
 int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 {
-	unsigned char L1, L2, packetSize;
+	unsigned char L1, L2;
+	unsigned int packetSize;
 
 	//usando teorema do resto
-	L1 = size / 256;
-	L2 = size % 256;
+	L1 = size % 256;
+	L2 = size / 256;
 
 	packetSize = 4 + size;
 	char * frame = malloc (packetSize);
@@ -136,6 +137,9 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	frame[1] = sequenceNumber;
 	frame[2] = L2;
 	frame[3] = L1;
+
+	printf("%d\n", frame[3]);
+	printf("256 * %d + %d = %d\n", L2, L1, 256 * L2 + L1);
 
 	memcpy(&frame[4], buffer, size);
 
@@ -187,12 +191,13 @@ void receive(LinkLayer *linkLayer)
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 	
 	printf("File size: %d File Name: %s\n",fileSize,  fileName);
-	FILE *file = openFile(1, fileName); //Mudar isto e colocar função das utilities
+	FILE *file = openFile(0, "e.gif"); //Mudar isto e colocar fileNAme
 
 	while (1)
 	{
-		//char * data;
-		int C_data;//, C_packet, N, L1, L2, lenght;
+		char * data;
+		int C_data, C_packet;//, N;
+		unsigned int L1, L2, lenght;
 
 		size = llread (linkLayer);
 
@@ -218,39 +223,58 @@ void receive(LinkLayer *linkLayer)
 			break;
 		}
 
-		/*else if (C_data != 1) 
+		else if (C_data != 1) 
 		{
 			printf ("receive: packet received not expected\n");
 			exit(-1);
 		}
 
-		N = linkLayer->frame[5];
+		//N = linkLayer->frame[5];
 		L2 = linkLayer->frame[6];
-		L1 = linkLayer->frame[7];
+		L1 = 216;
+		//L1 = linkLayer->frame[7];
+
+		int i;
+		for (i = 0; i < 10; i++)
+			printf("frame[%d] = %d\n", i, linkLayer->frame[i]);
 
 		lenght = 256 * L2 + L1;
-
-		C_packet = linkLayer->frame[2]; 
+		printf("256 * %d + %d = %d\n", L2, L1, lenght);
+		C_packet = linkLayer->frame[2]; //que contém sequence number
 
 		//TODO verificar sequence e BCC2  
 
 
+		if (linkLayer->sequenceNumber != C_packet << 6) // se o sequence number não for o esperado TODO pôr validação do BCC2
+		{
+			linkLayer->nREJ++;
+			if(linkLayer)
+				sendMessage(linkLayer->fd, REJ1);
+			else
+				sendMessage(linkLayer->fd, REJ0);
+			continue;
+		}
+		
+		data = malloc(lenght);
+		printf("251\n");
 		memcpy (data, &linkLayer->frame[8], lenght);
-	*/
+		printf("253\n");
+
+		fwrite (data, sizeof(char), lenght, file);
+		free(data);
+
+		linkLayer->nRR++;
+		if(linkLayer)
+			sendMessage(linkLayer->fd, RR1);
+		else
+			sendMessage(linkLayer->fd, RR0);
+
+		linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 	}
 
+	closeFile(file);
 	
 	clock_t endTime = clock();
 
 	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
-}
-
-int receivePacket (LinkLayer *linkLayer, int * lenght, char ** data)
-{
-	
-
-
-
-
-	return 0;
 }
