@@ -264,14 +264,3 @@ void llcloseR(LinkLayer *linkLayer)
         printf("%s\n", "UA was received");
     }
 }
-
-int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received){
-    unsigned char expected=0;
-
-    unsigned int i =0;
-    for(i;i<packetSize;i++){
-        expected ^=packet[i];
-    }
-
-    return(expected==received);
-}

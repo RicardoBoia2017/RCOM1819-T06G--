@@ -238,10 +238,8 @@ void receive(LinkLayer *linkLayer)
 
 		C_packet = linkLayer->frame[2]; //que contém sequence number
 
-		//TODO verificar sequence e BCC2  
-
-
-		if (linkLayer->sequenceNumber != C_packet << 6) // se o sequence number não for o esperado TODO pôr validação do BCC2
+		if (linkLayer->sequenceNumber != C_packet << 6 || 
+			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) // se o sequence number não for o esperado TODO pôr validação do BCC2
 		{
 			linkLayer->nREJ++;
 			if(linkLayer)

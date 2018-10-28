@@ -59,5 +59,6 @@ int stateValidMessage(int fd, const unsigned char cmd[]);
 int validateFrame(int fd, char * frame);
 int stuffing(char* frame,int size);
 int destuffing(char* frame,int size);
+int isValidBcc2(char * packet,int packetSize,unsigned char received);
 
 #endif

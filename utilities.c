@@ -289,3 +289,14 @@ int destuffing(char *frame, int size)
 
 	return resultSize;
 }
+
+int isValidBcc2(char * packet,int packetSize,unsigned char received){
+    unsigned char expected = 0;
+
+    unsigned int i = 4;
+    for(;i<packetSize - 2;i++){
+        expected ^= packet[i];
+    }
+
+    return(expected==received);
+}
