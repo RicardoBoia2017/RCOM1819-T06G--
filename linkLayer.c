@@ -10,7 +10,7 @@ void setupLinkLayer(LinkLayer *linkLayer)
     linkLayer->fd = -1;
     linkLayer->port = "/dev/ttyS0";
     linkLayer->baudRate =
-        linkLayer->sequenceNumber = 0;
+    linkLayer->sequenceNumber = 0;
     linkLayer->timeout = 3;
     linkLayer->numTransmissions = 3;
     linkLayer->frame = malloc(MAX_SIZE);
@@ -62,24 +62,21 @@ void llopenT(LinkLayer *linkLayer)
 
     (void)signal(SIGALRM, alrmHanler);
 
-    char result_A_C[2]; //Tirar isto depois
-
     while (!outOfTries(linkLayer->numTransmissions)  && getTimeOut() == TRUE)
     {
         setTimeOut(FALSE);
 
-        alarm(3);
+        alarm(linkLayer->timeout);
 
         sendMessage(linkLayer->fd, SETUP);
-        //	receiveResponse(linkLayer->fd);
-        stateValidMessage(linkLayer->fd, result_A_C, UA);
+        stateValidMessage(linkLayer->fd, UA);
 
         alarm(0);
     }
 
     if (outOfTries(linkLayer->numTransmissions) )
     {
-        printf("%s\n", "Failed to send the message (3 attemps)");
+        printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
         exit(-1);
     }
     else
@@ -90,10 +87,9 @@ void llopenT(LinkLayer *linkLayer)
 
 void llopenR(LinkLayer *linkLayer)
 {
-    char result_A_C[2];
     setTimeOut(FALSE);
 
-    stateValidMessage(linkLayer->fd, result_A_C, SETUP);
+    stateValidMessage(linkLayer->fd, SETUP);
     printf("SETUP receives\n");
     sendMessage(linkLayer->fd, UA);
     printf("UA sent\n");
@@ -130,7 +126,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
     {
         //printf("Entrou\n");
         setTimeOut(FALSE);
-        alarm(3);
+        alarm(linkLayer->timeout);
 
         if (write(linkLayer->fd, packet, 6 + newLenght) < 0)
         {
@@ -176,7 +172,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 
     if (tries == 3)
     {
-        printf("%s\n", "Failed to send the message (3 attemps)");
+        printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
         exit(-1);
     }
     else
@@ -203,25 +199,24 @@ void llcloseT(LinkLayer *linkLayer)
 
     resetTries();
     setTimeOut (TRUE);
-    char result_A_C[2];
 
     while (!outOfTries(linkLayer->numTransmissions)  && getTimeOut() == TRUE)
     {
 
         setTimeOut (FALSE);
-        alarm(3);
+        alarm(linkLayer->timeout);
 
         sendMessage(linkLayer->fd, DISC);
 
         //	receiveResponse(linkLayer->fd);
-        stateValidMessage(linkLayer->fd, result_A_C, DISC);
+        stateValidMessage(linkLayer->fd, DISC);
 
         alarm(0);
     }
 
     if (outOfTries(linkLayer->numTransmissions) )
     {
-        printf("%s\n", "Failed to send the message (3 attemps)");
+        printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
         exit(-1);
     }
     else
@@ -236,29 +231,28 @@ void llcloseR(LinkLayer *linkLayer)
 {
     resetTries();
     setTimeOut (TRUE);
-    char result_A_C[2];
 
     (void)signal(SIGALRM, alrmHanler);
 
-   // stateValidMessage(linkLayer->fd, result_A_C, DISC);
+   // stateValidMessage(linkLayer->fd, DISC);
     printf("DISC received\n");
     while (!outOfTries(linkLayer->numTransmissions) && getTimeOut() == TRUE)
     {
 
         setTimeOut (FALSE);
-        alarm(3);
+        alarm(linkLayer->timeout);
 
         sendMessage(linkLayer->fd, DISC);
         printf("DISC sent\n");
         //	receiveResponse(linkLayer->fd);
-        stateValidMessage(linkLayer->fd, result_A_C, UA);
+        stateValidMessage(linkLayer->fd, UA);
         printf("UA received\n");
         alarm(0);
     }
 
     if (outOfTries(linkLayer->numTransmissions) )
     {
-        printf("%s\n", "Failed to send the message (3 attemps)");
+        printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
         exit(-1);
     }
     else

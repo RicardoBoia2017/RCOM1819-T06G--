@@ -10,14 +10,14 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-	//llopenT(linkLayer);
+		llopenT(linkLayer);
 		send (linkLayer);
-	//	llcloseT(linkLayer);
+		llcloseT(linkLayer);
 		break;
 	case RECEIVER:
-	//	llopenR(linkLayer);
+		llopenR(linkLayer);
 		receive (linkLayer);
-	//	llcloseR(linkLayer);
+		llcloseR(linkLayer);
 		break;
 	}
 }
@@ -256,7 +256,7 @@ void receive(LinkLayer *linkLayer)
 		memcpy (data, &linkLayer->frame[8], lenght);
 
 		fwrite (data, sizeof(char), lenght, file);
-	//	free(data);
+		free(data);
 
 		linkLayer->nRR++;
 		if(linkLayer)

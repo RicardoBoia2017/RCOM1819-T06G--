@@ -55,7 +55,7 @@ FILE* openFile(int type ,char* filePath);
 void closeFile(FILE * file);
 unsigned int getFileSize(char *fileName);
 void sendMessage(int fd, const unsigned char cmd[]);
-int stateValidMessage(int fd, char res[], const unsigned char cmd[]);
+int stateValidMessage(int fd, const unsigned char cmd[]);
 int validateFrame(int fd, char * frame);
 int stuffing(char* frame,int size);
 int destuffing(char* frame,int size);

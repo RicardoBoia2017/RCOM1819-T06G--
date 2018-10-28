@@ -82,9 +82,8 @@ void sendMessage(int fd, const unsigned char cmd[])
 
 }
 
-int stateValidMessage(int fd, char res[], const unsigned char cmd[])
+int stateValidMessage(int fd, const unsigned char cmd[])
 {
-
 	int state = 0, aux;
 	unsigned char reader;
 
@@ -99,7 +98,7 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[])
 			exit(-1);
 		}
 
-		printf("reader=%x state=%d\n", reader, state);
+		//printf("reader=%x state=%d\n", reader, state);
 
 		switch (state)
 		{
@@ -112,7 +111,6 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[])
 				state = 0;
 			break;
 		case 1:
-			res[0] = reader;
 			if (reader == cmd[1])
 				state = 2;
 
@@ -120,8 +118,6 @@ int stateValidMessage(int fd, char res[], const unsigned char cmd[])
 				state = 0;
 			break;
 		case 2:
-			res[1] = reader;
-
 			if (reader == cmd[2])
 				state = 3;
 
