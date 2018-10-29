@@ -59,9 +59,9 @@ void send(LinkLayer *linkLayer)
 	//control packet size
 	TLV startTLVSize;
 
-	unsigned int fileSize = getFileSize(linkLayer->fileName);
+	linkLayer->fileSize = getFileSize(linkLayer->fileName);
 
-	sprintf(sizeString, "%d", fileSize);
+	sprintf(sizeString, "%d", linkLayer->fileSize);
 
 	startTLVSize.type = 0;
 	startTLVSize.lenght = strlen(sizeString);
@@ -78,7 +78,7 @@ void send(LinkLayer *linkLayer)
 
 	FILE *file = openFile(1, linkLayer->fileName);
 
-	char *fileData = (char *)malloc(fileSize);
+	char *fileData = (char *)malloc(linkLayer->fileSize);
 	int nBytesRead = 0, sequenceNumber = 0;
 
 	while ((nBytesRead = fread(fileData, sizeof(unsigned char), 256, file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
@@ -196,6 +196,9 @@ void receive(LinkLayer *linkLayer)
 	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
+
+	linkLayer->fileName = fileName;
+	linkLayer->fileSize = fileSize;
 
 	FILE *file = openFile(0, "e.gif"); //TODO Mudar isto e colocar fileNAme
 

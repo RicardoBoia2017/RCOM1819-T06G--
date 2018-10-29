@@ -12,6 +12,7 @@ void setupLinkLayer(LinkLayer *linkLayer)
     linkLayer->frame = malloc(MAX_SIZE);
 
     linkLayer->fileName = "pinguim.gif"; //Considerar passar o nome do ficheiro por terminal
+    linkLayer->fileSize = 0;
 
     linkLayer->nRR = 0;
     linkLayer->nREJ = 0;

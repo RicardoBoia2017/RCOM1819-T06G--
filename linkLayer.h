@@ -24,6 +24,7 @@ typedef struct
 	unsigned char *frame;		   //trama
 
 	char *fileName; //nome do ficheiro
+	int fileSize;
 
 	unsigned int nRR;
 	unsigned int nREJ;

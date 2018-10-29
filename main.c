@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
+void printStats (LinkLayer * linkLayer)
+{
+	printf("File name = %s\n", linkLayer->fileName);
+	printf("File size = %d\n", linkLayer->fileSize);	
+	printf("#RR = %d \n#REJ = %d\n", linkLayer->nRR, linkLayer->nREJ);
+	printf("Time: %f s\n", linkLayer->totalTime);
+}
+
 int main(int argc, char *argv[]) {
 
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
@@ -27,7 +35,6 @@ int main(int argc, char *argv[]) {
 	
 	startAppLayer(linkLayer, appLayer);		
 
-	printf("#RR = %d \n#REJ = %d\n", linkLayer->nRR, linkLayer->nREJ);
-	printf("Time: %f s\n", linkLayer->totalTime);
+	printStats(linkLayer);
 	return 0;
 }
