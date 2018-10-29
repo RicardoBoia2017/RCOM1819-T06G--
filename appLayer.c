@@ -117,7 +117,7 @@ int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParamet
 	for (i = 0; i < nParameters; i++)
 		packetSize += 2 + controlPacket->parameters[i].lenght;
 
-	char frame[packetSize];
+	unsigned char frame[packetSize];
 	frame[0] = controlPacket->controlField; //conversão de inteiro para char (pode estar errado)
 
 	for (i = 0; i < nParameters; i++)
@@ -146,7 +146,7 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	L2 = size / 256;
 
 	packetSize = 4 + size;
-	char * frame = malloc (packetSize);
+	unsigned char * frame = malloc (packetSize);
 
 	frame[0] = 1;
 	frame[1] = sequenceNumber;
@@ -249,8 +249,7 @@ void receive(LinkLayer *linkLayer)
 
 		//N = linkLayer->frame[5];
 		L2 = linkLayer->frame[6];
-		L1 = 216;
-		//L1 = linkLayer->frame[7];
+		L1 = linkLayer->frame[7];
 
 		lenght = 256 * L2 + L1;
 

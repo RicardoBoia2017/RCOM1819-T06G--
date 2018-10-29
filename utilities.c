@@ -145,7 +145,7 @@ int stateValidMessage(int fd, const unsigned char cmd[])
 	return 0;
 }
 
-int validateFrame(int fd, char *frame)
+int validateFrame(int fd, unsigned char *frame)
 {
 
 	int state = 0, bytesRead, dataSize = 0;
@@ -298,7 +298,7 @@ char receiveResponse(int fd)
 	return 0;
 }
 
-int stuffing(char *frame, int size)
+int stuffing(unsigned char *frame, int size)
 {
 	char *result = malloc(20000);
 	int resultSize = size;
@@ -334,7 +334,7 @@ int stuffing(char *frame, int size)
 	return resultSize;
 }
 
-int destuffing(char *frame, int size)
+int destuffing(unsigned char *frame, int size)
 {
 	int i, j = 0;
 	char *result = malloc(20000);
@@ -365,7 +365,7 @@ int destuffing(char *frame, int size)
 	return resultSize;
 }
 
-int isValidBcc2(char * packet,int packetSize,unsigned char received){
+int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received){
     unsigned char expected = 0;
 
     unsigned int i = 4;

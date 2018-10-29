@@ -106,10 +106,10 @@ int llopenR(LinkLayer *linkLayer)
 	return 0;
 }
 
-int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
+int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght)
 {
 
-    char *packet = malloc(12000);
+    unsigned char *packet = malloc(12000);
     resetTries();
     setTimeOut(TRUE);
 

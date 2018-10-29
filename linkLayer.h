@@ -21,7 +21,7 @@ typedef struct
 	unsigned int sequenceNumber;   /*Número de sequência da trama: 0, 1*/
 	unsigned int timeout;		   /*Valor do temporizador: 1 s*/
 	unsigned int numTransmissions; /*Número de tentativas em caso de falha*/
-	char *frame;				   //trama
+	unsigned char *frame;				   //trama
 
 	char *fileName; //nome do ficheiro
 
@@ -37,7 +37,7 @@ int openPort(LinkLayer *linkLayer);
 int setTermiosStructure(LinkLayer *linkLayer);
 int llopenT(LinkLayer *linkLayer); // Tem que retornar inteiro
 int llopenR(LinkLayer *linkLayer); // Tem que retornar inteiro
-int llwrite(LinkLayer *linkLayer, char *buffer, int lenght);
+int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght);
 int llread(LinkLayer *linkLayer);
 int llcloseT(LinkLayer *linkLayer); // Tem que retornar inteiro
 int llcloseR(LinkLayer *linkLayer); // Tem que retornar inteiro
