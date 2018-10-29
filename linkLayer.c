@@ -1,11 +1,11 @@
 #include "linkLayer.h"
 #include <stdio.h>
 
-void setupLinkLayer(LinkLayer *linkLayer)
+void setupLinkLayer(LinkLayer *linkLayer,int baudrate)
 {
     linkLayer->fd = -1;
     linkLayer->port = "/dev/ttyS0";
-    linkLayer->baudRate = 0; //TODO change this
+    linkLayer->baudRate = validBaudRate(baudrate); //TODO change this
     linkLayer->sequenceNumber = 0;
     linkLayer->timeout = 3;
     linkLayer->numTransmissions = 3;
