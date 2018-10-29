@@ -33,13 +33,13 @@ typedef struct
 struct termios oldtio, newtio;
 
 void setupLinkLayer(LinkLayer *linkLayer);
-void openPort(LinkLayer *linkLayer);
-void setTermiosStructure(LinkLayer *linkLayer);
-void llopenT(LinkLayer *linkLayer); // Tem que retornar inteiro
-void llopenR(LinkLayer *linkLayer); // Tem que retornar inteiro
+int openPort(LinkLayer *linkLayer);
+int setTermiosStructure(LinkLayer *linkLayer);
+int llopenT(LinkLayer *linkLayer); // Tem que retornar inteiro
+int llopenR(LinkLayer *linkLayer); // Tem que retornar inteiro
 int llwrite(LinkLayer *linkLayer, char *buffer, int lenght);
 int llread(LinkLayer *linkLayer);
-void llcloseT(LinkLayer *linkLayer); // Tem que retornar inteiro
-void llcloseR(LinkLayer *linkLayer); // Tem que retornar inteiro
+int llcloseT(LinkLayer *linkLayer); // Tem que retornar inteiro
+int llcloseR(LinkLayer *linkLayer); // Tem que retornar inteiro
 
 #endif
