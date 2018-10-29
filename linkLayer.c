@@ -126,6 +126,7 @@ int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght)
     {
         setTimeOut(FALSE);
         alarm(linkLayer->timeout);
+     //   sleep(linkLayer->timeout - 1);
 
         if (write(linkLayer->fd, packet, newLenght + 6) < 0)
         {
@@ -142,7 +143,11 @@ int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght)
 
         else if (response == C_REJ0 ||
                  response == C_REJ1)
+        {
+            setTimeOut(TRUE);
+            incTries();
             linkLayer->nREJ++;
+        }
 
         alarm(0);
     }

@@ -37,7 +37,6 @@ int main(int argc, char *argv[]) {
 		return -1;	
 	
 	startAppLayer(linkLayer, appLayer);		
-
 	printStats(linkLayer);
 	return 0;
 }

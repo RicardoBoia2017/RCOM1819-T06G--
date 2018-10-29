@@ -70,7 +70,8 @@ void send(LinkLayer *linkLayer)
 	TLV listParameters[2] = {startTLVSize, startTLVName};
 	startCP.parameters = listParameters;
 
-	clock_t startTime = clock();
+	struct timeval start;
+	gettimeofday(&start, NULL);
 
 	sendControl(linkLayer, &startCP, 2);
 
@@ -100,9 +101,11 @@ void send(LinkLayer *linkLayer)
 
 	sendControl(linkLayer, &endCP, 2);
 
-	clock_t endTime = clock();
+	struct timeval end;
+	gettimeofday(&end, NULL);
 
-	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+
+	linkLayer->totalTime = (double) (end.tv_usec - start.tv_usec) / 1000000 + (double) (end.tv_sec - start.tv_sec);
 }
 
 int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters)
@@ -163,10 +166,31 @@ void receive(LinkLayer *linkLayer)
 	int size;
 	unsigned int fileSize, index = 0;
 	char *fileName;
-	clock_t startTime = clock();
+	struct timeval start;
+	gettimeofday(&start, NULL);
 	//Start control packet
+	
+	while(1)
+	{
+		size = llread(linkLayer);
+		printf("%d\n",size);
+		if (linkLayer->sequenceNumber != linkLayer->frame[2] >> 6 ||
+		!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2]) ||
+		linkLayer->frame[4] != 2) 
+		{
+			linkLayer->nREJ++;
+			if (linkLayer->sequenceNumber)
+				sendMessage(linkLayer->fd, REJ1);
+			else
+				sendMessage(linkLayer->fd, REJ0);
 
-	size = llread(linkLayer);
+			continue;
+		}
+
+		else
+			break;
+
+	}
 
 	while (index < size)
 	{
@@ -191,8 +215,12 @@ void receive(LinkLayer *linkLayer)
 	}
 
 	printf("Received start control packet.\n");
-	sendMessage(linkLayer->fd, RR0); //TODO esta mensagem varia
 	linkLayer->nRR++;
+	if (linkLayer->sequenceNumber)
+		sendMessage(linkLayer->fd, RR1);
+	else
+		sendMessage(linkLayer->fd, RR0);
+
 	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
@@ -235,8 +263,11 @@ void receive(LinkLayer *linkLayer)
 
 		else if (dataC != 1)
 		{
-			printf("receive: packet received not expected\n");
-			exit(-1);
+			linkLayer->nREJ++;
+			if (linkLayer->sequenceNumber)
+				sendMessage(linkLayer->fd, REJ1);
+			else
+				sendMessage(linkLayer->fd, REJ0);
 		}
 
 		L2 = linkLayer->frame[6];
@@ -247,7 +278,7 @@ void receive(LinkLayer *linkLayer)
 		packetC = linkLayer->frame[2]; //que contém sequence number
 
 		if (linkLayer->sequenceNumber != packetC >> 6 ||
-			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) // se o sequence number não for o esperado TODO pôr validação do BCC2
+			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) 
 		{
 			linkLayer->nREJ++;
 			if (linkLayer->sequenceNumber)
@@ -276,7 +307,8 @@ void receive(LinkLayer *linkLayer)
 
 	closeFile(file);
 
-	clock_t endTime = clock();
+	struct timeval end;
+	gettimeofday(&end, NULL);
 
-	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+	linkLayer->totalTime = (double) (end.tv_usec - start.tv_usec) / 1000000 + (double) (end.tv_sec - start.tv_sec);
 }
