@@ -205,7 +205,7 @@ int validateFrame(int fd, unsigned char *frame)
 			else
 				state = 0;
 
-			if (simulateError())
+			if (simulateError(1))
 			{
 				state = 0;
 				printf("Error simulate\n");
@@ -369,8 +369,11 @@ int isValidBcc2(unsigned char *packet, int packetSize, unsigned char received)
 		expected ^= packet[i];
 	}
 
-	if (simulateError())
+	if (simulateError(2))
+	{
+		printf("Error simulate2\n");
 		return 0;
+	}
 
 	return (expected == received);
 }
@@ -378,6 +381,11 @@ int isValidBcc2(unsigned char *packet, int packetSize, unsigned char received)
 int simulateError (int value) 
 {
 	int n = rand() % 100;
-	printf("%d\n", n);
-	return n < ERRORPROBABILITY;
+//	printf("Valor = %d  Rand = %d\n", value, n);
+	if (value == 1)
+		return n < ERRORPROBABILITY1;
+	if (value == 2)
+		return n < ERRORPROBABILITY2;
+
+	return 0;
 }

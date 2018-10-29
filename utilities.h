@@ -14,7 +14,8 @@
 #define MAX_SIZE 255 //talvez esteja mal
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
-#define ERRORPROBABILITY 0
+#define ERRORPROBABILITY1 0
+#define ERRORPROBABILITY2 10
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
