@@ -10,16 +10,43 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	switch (appLayer->status)
 	{
 	case TRANSMITTER:
-		llopenT(linkLayer);
-		send (linkLayer);
-		llcloseT(linkLayer);
+		transmitter(linkLayer);
 		break;
 	case RECEIVER:
-		llopenR(linkLayer);
-		receive (linkLayer);
-		llcloseR(linkLayer);
+		receiver(linkLayer);
 		break;
 	}
+}
+
+void transmitter (LinkLayer * linkLayer)
+{
+		if (llopenT(linkLayer) < 0)
+		{
+			perror ("llopen transmitter");
+			exit(-1);
+		}
+		send (linkLayer);
+
+		if (llcloseT(linkLayer) < 0)
+		{
+			perror ("llclose transmitter");
+			exit(-1);
+		}
+}
+
+void receiver (LinkLayer * linkLayer)
+{
+		if (llopenR(linkLayer) < 0)
+		{
+			perror ("llopen receiver");
+			exit(-1);
+		}
+		receive (linkLayer);
+		if (llcloseR(linkLayer) < 0)
+		{
+			perror ("llopen receiver");
+			exit(-1);
+		}
 }
 
 void send(LinkLayer *linkLayer)
@@ -68,7 +95,7 @@ void send(LinkLayer *linkLayer)
 
 	while ((nBytesRead = fread(fileData, sizeof(unsigned char),fileSize , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
-		sendData(linkLayer, fileData, nBytesRead, sequenceNumber++ % 255);
+		sendData(linkLayer, fileData, fileSize, sequenceNumber++ % 255);
 
 		memset(fileData, 0, 255);
 		if (linkLayer->sequenceNumber)
