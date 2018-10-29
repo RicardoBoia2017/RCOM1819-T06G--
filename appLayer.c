@@ -207,7 +207,6 @@ void receive(LinkLayer *linkLayer)
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 	
-	printf("File size: %d File Name: %s\n",fileSize,  fileName);
 	FILE *file = openFile(0, "e.gif"); //Mudar isto e colocar fileNAme
 
 	while (1)
@@ -263,9 +262,15 @@ void receive(LinkLayer *linkLayer)
 		{
 			linkLayer->nREJ++;
 			if(linkLayer->sequenceNumber)
+			{
 				sendMessage(linkLayer->fd, REJ1);
+				printf("REJ1 send\n");
+			}
 			else
+			{
 				sendMessage(linkLayer->fd, REJ0);
+				printf("REJ0 send\n");
+			}
 			continue;
 		}
 		
@@ -280,12 +285,12 @@ void receive(LinkLayer *linkLayer)
 		if(linkLayer->sequenceNumber)
 		{
 			sendMessage(linkLayer->fd, RR1);
-			printf("RR\n");
+			printf("RR1 sent\n");
 		}
 		else
 		{
 			sendMessage(linkLayer->fd, RR0);
-			printf("RR\n");
+			printf("RR0 sent\n");
 		}
 
 		linkLayer->sequenceNumber = !linkLayer->sequenceNumber;

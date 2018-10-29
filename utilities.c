@@ -229,7 +229,7 @@ char receiveResponse(int fd)
 {
 	int state = 0, aux;
 	unsigned char reader;
-	char commandReceived;
+	unsigned char commandReceived;
 
 	while (state != FINALSTATE && timeOut == FALSE)
 	{
@@ -241,8 +241,6 @@ char receiveResponse(int fd)
 			perror("receiveResponse");
 			exit(-1);
 		}
-
-		//printf("reader=%x state=%d\n", reader, state);
 
 		switch (state)
 		{
@@ -275,7 +273,6 @@ char receiveResponse(int fd)
 				state = 0;
 			break;
 		case 3:
-
 			if ( (commandReceived ^ A) == reader)
 				state = 4;
 			else
@@ -376,7 +373,7 @@ int isValidBcc2(char * packet,int packetSize,unsigned char received){
         expected ^= packet[i];
     }
 
-	//printf("Expected = %x  Received = %x\n", expected, received);
+//	printf("Expected = %x  Received = %x\n", expected, received);
 
     return(expected==received);
 }

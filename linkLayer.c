@@ -99,9 +99,9 @@ int llopenR(LinkLayer *linkLayer)
     setTimeOut(FALSE);
 
     stateValidMessage(linkLayer->fd, SETUP);
-    printf("SETUP receives\n");
+ //   printf("SETUP receives\n");
     sendMessage(linkLayer->fd, UA);
-    printf("UA sent\n");
+ //   printf("UA sent\n");
 
 	return 0;
 }
@@ -137,22 +137,28 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
         setTimeOut(FALSE);
         alarm(linkLayer->timeout);
 
-        if (write(linkLayer->fd, packet, 6 + newLenght) < 0)
+        if (write(linkLayer->fd, packet, newLenght + 6) < 0)
         {
             perror("write");
             return -1;
         }
 
-        char response = 10;
+        unsigned char response = 10;
         response = receiveResponse(linkLayer->fd);
         printf("Response = %x\n", response);
         if (response == C_RR0 ||
             response == C_RR1)
-            linkLayer->nRR++;
-
+            {
+                linkLayer->nRR++;
+                printf ("+ RR\n");
+            }
         else if (response == C_REJ0 ||
                  response == C_REJ1)
+            {    
             linkLayer->nREJ++;
+            printf ("+ REJ\n");
+            
+            }
 
         alarm(0);
     }
@@ -226,7 +232,7 @@ int llcloseR(LinkLayer *linkLayer)
     (void)signal(SIGALRM, alrmHanler);
 
    // stateValidMessage(linkLayer->fd, DISC);
-    printf("DISC received\n");
+ //   printf("DISC received\n");
     while (!outOfTries(linkLayer->numTransmissions) && getTimeOut() == TRUE)
     {
 
@@ -234,10 +240,10 @@ int llcloseR(LinkLayer *linkLayer)
         alarm(linkLayer->timeout);
 
         sendMessage(linkLayer->fd, DISC);
-        printf("DISC sent\n");
+  //      printf("DISC sent\n");
         //	receiveResponse(linkLayer->fd);
         stateValidMessage(linkLayer->fd, UA);
-        printf("UA received\n");
+  //      printf("UA received\n");
         alarm(0);
     }
 
