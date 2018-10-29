@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 void printStats (LinkLayer * linkLayer)
 {
@@ -13,6 +14,8 @@ void printStats (LinkLayer * linkLayer)
 }
 
 int main(int argc, char *argv[]) {
+
+	srand ( time(NULL) );
 
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
 	setupLinkLayer (linkLayer);

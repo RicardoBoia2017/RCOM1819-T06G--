@@ -12,11 +12,11 @@ void alrmHanler(int sig)
 	tries++;
 }
 
-void resetTries() {tries = 0;}
+void resetTries() { tries = 0; }
 
-void incTries() {tries++;}
+void incTries() { tries++; }
 
-int outOfTries (int maxTries) { return tries >= maxTries; }
+int outOfTries(int maxTries) { return tries >= maxTries; }
 
 void setTimeOut(int value)
 {
@@ -38,20 +38,19 @@ FILE *openFile(int type, char *filePath)
 	if (result == NULL)
 	{
 		perror("error to open the file ");
-		exit (-1);
+		exit(-1);
 	}
 	return result;
 }
 
 void closeFile(FILE *file)
 {
-	if (fclose (file) != 0)
+	if (fclose(file) != 0)
 	{
 		perror("closeFile");
 		exit(-1);
 	}
 }
-
 
 unsigned int getFileSize(char *fileName)
 {
@@ -79,9 +78,7 @@ void sendMessage(int fd, const unsigned char cmd[])
 			perror("sendMessage");
 			exit(-1);
 		}
-
 	}
-
 }
 
 int stateValidMessage(int fd, const unsigned char cmd[])
@@ -207,9 +204,15 @@ int validateFrame(int fd, unsigned char *frame)
 
 			else
 				state = 0;
+
+			if (simulateError())
+			{
+				state = 0;
+				printf("Error simulate\n");
+			}
 			break;
 
-		case 4:	 //BCC
+		case 4:							  //BCC
 			frame[4 + dataSize] = reader; //Vai colocando dados até encontrar flag
 			dataSize++;
 			if (reader == FLAG)
@@ -260,20 +263,21 @@ char receiveResponse(int fd)
 			if (reader == C_RR0 ||
 				reader == C_RR1 ||
 				reader == C_REJ0 ||
-				reader == C_REJ1 )
-				{
-					commandReceived = reader;
-					state = 3;
-				}
+				reader == C_REJ1)
+			{
+				commandReceived = reader;
+				state = 3;
+			}
 
 			else if (reader != FLAG)
 				state = 0;
 			break;
 		case 3:
-			if ( (commandReceived ^ A) == reader)
+			if ((commandReceived ^ A) == reader)
 				state = 4;
 			else
 				state = 0;
+
 
 			break;
 		case 4:
@@ -287,8 +291,8 @@ char receiveResponse(int fd)
 	}
 
 	if (state == FINALSTATE)
-		return commandReceived;	
-	
+		return commandReceived;
+
 	return 0;
 }
 
@@ -344,10 +348,10 @@ int destuffing(unsigned char *frame, int size)
 	{
 		if (frame[i] == ESC)
 			result[j] = frame[++i] ^ 0X20;
-		
+
 		else
 			result[j] = frame[i];
-		
+
 		j++;
 	}
 	memcpy(frame, result, resultSize);
@@ -355,13 +359,25 @@ int destuffing(unsigned char *frame, int size)
 	return resultSize;
 }
 
-int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received){
-    unsigned char expected = 0;
+int isValidBcc2(unsigned char *packet, int packetSize, unsigned char received)
+{
+	unsigned char expected = 0;
 
-    unsigned int i = 4;
-    for(;i<packetSize - 2;i++){
-        expected ^= packet[i];
-    }
+	unsigned int i = 4;
+	for (; i < packetSize - 2; i++)
+	{
+		expected ^= packet[i];
+	}
 
-    return(expected==received);
+	if (simulateError())
+		return 0;
+
+	return (expected == received);
+}
+
+int simulateError (int value) 
+{
+	int n = rand() % 100;
+	printf("%d\n", n);
+	return n < ERRORPROBABILITY;
 }
