@@ -110,7 +110,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 {
 
     char *packet = malloc(12000);
-    int tries = 0;
+    resetTries();
     setTimeOut(TRUE);
 
     packet[0] = FLAG;
@@ -131,7 +131,7 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
 
     int newLenght = stuffing(packet, lenght + 6);
 
-    while (tries < 3 && getTimeOut() == TRUE)
+    while (!outOfTries(linkLayer->numTransmissions) && getTimeOut() == TRUE)
     {
         //printf("Entrou\n");
         setTimeOut(FALSE);
@@ -143,21 +143,21 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
             return -1;
         }
 
-        char response = 0;
+        char response = 10;
         response = receiveResponse(linkLayer->fd);
-
+        printf("Response = %x\n", response);
         if (response == C_RR0 ||
             response == C_RR1)
             linkLayer->nRR++;
 
         else if (response == C_REJ0 ||
-                 response == C_REJ1) 
-            linkLayer->nRR++;
+                 response == C_REJ1)
+            linkLayer->nREJ++;
 
         alarm(0);
     }
 
-    if (tries == 3)
+    if (outOfTries(linkLayer->numTransmissions))
     {
         printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
        	return -1;

@@ -14,6 +14,8 @@ void alrmHanler(int sig)
 
 void resetTries() {tries = 0;}
 
+void incTries() {tries++;}
+
 int outOfTries (int maxTries) { return tries >= maxTries; }
 
 void setTimeOut(int value)
@@ -226,7 +228,8 @@ int validateFrame(int fd, char *frame)
 char receiveResponse(int fd)
 {
 	int state = 0, aux;
-	unsigned char reader, commandReceived;
+	unsigned char reader;
+	char commandReceived;
 
 	while (state != FINALSTATE && timeOut == FALSE)
 	{
@@ -288,7 +291,14 @@ char receiveResponse(int fd)
 			break;
 		}
 	}
-	return commandReceived;	
+
+	if (state == FINALSTATE)
+	{
+		printf("Command = %x\n", commandReceived);
+		return commandReceived;	
+	}
+	
+	return 0;
 }
 
 int stuffing(char *frame, int size)
@@ -365,6 +375,8 @@ int isValidBcc2(char * packet,int packetSize,unsigned char received){
     for(;i<packetSize - 2;i++){
         expected ^= packet[i];
     }
+
+	//printf("Expected = %x  Received = %x\n", expected, received);
 
     return(expected==received);
 }

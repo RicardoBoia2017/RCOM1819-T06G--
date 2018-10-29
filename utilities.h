@@ -48,6 +48,7 @@ static const unsigned char REJ1[5] = { FLAG, A, C_REJ1, A ^ C_REJ1, FLAG };
 
 void alrmHanler(int sig);
 void resetTries();
+void incTries();
 int outOfTries (int maxTries);
 void setTimeOut (int value);
 int getTimeOut ();

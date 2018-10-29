@@ -91,10 +91,6 @@ void send(LinkLayer *linkLayer)
 		sendData(linkLayer, fileData, fileSize, sequenceNumber++ % 255);
 
 		memset(fileData, 0, 255);
-		if (linkLayer->sequenceNumber)
-			linkLayer->sequenceNumber = 0;
-		else
-			linkLayer->sequenceNumber = 1;
 	}
 	
 	free(fileData);
@@ -133,10 +129,9 @@ int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParamet
 	}
 
 	if (llwrite(linkLayer, frame, packetSize) < 0)
-	{
-		perror("llwrite");
 		exit(-1);
-	}
+	
+	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	return 0;
 }
@@ -164,10 +159,10 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	memcpy(&frame[4], buffer, size);
 
 	if (llwrite(linkLayer, frame, packetSize) < 0)
-	{
-		perror("llwrite");
 		exit(-1);
-	}
+	
+
+	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	return 0;
 }
@@ -207,6 +202,8 @@ void receive(LinkLayer *linkLayer)
 
 	printf("Received start control packet.\n");
 	sendMessage(linkLayer->fd, RR0); //TODO esta mensagem varia
+	linkLayer->nRR++;	
+	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 	
@@ -239,6 +236,8 @@ void receive(LinkLayer *linkLayer)
 		{
 			printf("Received end control packet.\n");
 
+			linkLayer->nRR++;
+
 			sendMessage(linkLayer->fd, RR0); //Só para testes
 			break;
 		}
@@ -257,8 +256,9 @@ void receive(LinkLayer *linkLayer)
 		lenght = 256 * L2 + L1;
 
 		C_packet = linkLayer->frame[2]; //que contém sequence number
-
-		if (linkLayer->sequenceNumber != C_packet << 6 || 
+		//printf("C_packet = %d  Sequence number = %d\n", C_packet >> 6, linkLayer->sequenceNumber);
+		//printf("C_packet = %d\n", C_packet);
+		if (linkLayer->sequenceNumber != C_packet >> 6 || 
 			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) // se o sequence number não for o esperado TODO pôr validação do BCC2
 		{
 			linkLayer->nREJ++;
@@ -278,9 +278,15 @@ void receive(LinkLayer *linkLayer)
 
 		linkLayer->nRR++;
 		if(linkLayer->sequenceNumber)
+		{
 			sendMessage(linkLayer->fd, RR1);
+			printf("RR\n");
+		}
 		else
+		{
 			sendMessage(linkLayer->fd, RR0);
+			printf("RR\n");
+		}
 
 		linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 	}
