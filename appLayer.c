@@ -228,7 +228,7 @@ void receive(LinkLayer *linkLayer)
 	linkLayer->fileName = fileName;
 	linkLayer->fileSize = fileSize;
 
-	FILE *file = openFile(0, "e.gif"); //TODO Mudar isto e colocar fileNAme
+	FILE *file = openFile(0, linkLayer->fileName); //TODO Mudar isto e colocar fileNAme
 
 	while (1)
 	{

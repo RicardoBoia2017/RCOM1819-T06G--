@@ -11,7 +11,7 @@ void setupLinkLayer(LinkLayer *linkLayer,int baudrate)
     linkLayer->numTransmissions = 3;
     linkLayer->frame = malloc(MAX_SIZE);
 
-    linkLayer->fileName = "pinguim.gif"; //Considerar passar o nome do ficheiro por terminal
+    linkLayer->fileName = "cat.jpg"; //Considerar passar o nome do ficheiro por terminal
     linkLayer->fileSize = 0;
 
     linkLayer->nRR = 0;
@@ -41,7 +41,7 @@ int setTermiosStructure(LinkLayer *linkLayer)
     }
 
     bzero(&newtio, sizeof(newtio));
-    newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+    newtio.c_cflag = linkLayer->baudRate | CS8 | CLOCAL | CREAD;
     newtio.c_iflag = IGNPAR;
     newtio.c_oflag = 0;
 
