@@ -389,3 +389,28 @@ int simulateError (int value)
 
 	return 0;
 }
+
+int validBaudRate(int brate){
+	int speed;
+	switch(brate){
+	case 600: speed=B600;
+        break;
+	case 1200: speed=B1200;
+        break;
+	case 1800: speed=B1800;
+        break;
+	case 2400: speed=B2400;
+        break;
+	case 4800: speed=B4800;
+        break;
+	case 9600: speed=B9600;
+        break;
+	case 19200: speed=B19200;
+        break;
+	case 38400: speed=B38400;
+        break;
+	
+	}
+return speed;
+
+}
