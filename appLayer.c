@@ -3,9 +3,11 @@
 
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 {
-	openPort(linkLayer); //abre serial port /dev/ttyS0 para leitura e escrita
+	if (openPort(linkLayer) < 0)
+		exit(-1);	
 
 	setTermiosStructure(linkLayer);
+		exit(-1);	
 
 	switch (appLayer->status)
 	{
@@ -21,32 +23,23 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 void transmitter (LinkLayer * linkLayer)
 {
 		if (llopenT(linkLayer) < 0)
-		{
-			perror ("llopen transmitter");
 			exit(-1);
-		}
+
 		send (linkLayer);
 
 		if (llcloseT(linkLayer) < 0)
-		{
-			perror ("llclose transmitter");
 			exit(-1);
-		}
 }
 
 void receiver (LinkLayer * linkLayer)
 {
 		if (llopenR(linkLayer) < 0)
-		{
-			perror ("llopen receiver");
 			exit(-1);
-		}
+
 		receive (linkLayer);
+
 		if (llcloseR(linkLayer) < 0)
-		{
-			perror ("llopen receiver");
 			exit(-1);
-		}
 }
 
 void send(LinkLayer *linkLayer)
