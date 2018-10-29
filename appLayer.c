@@ -6,7 +6,7 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	if (openPort(linkLayer) < 0)
 		exit(-1);	
 
-	setTermiosStructure(linkLayer);
+	else if (setTermiosStructure(linkLayer) < 0)
 		exit(-1);	
 
 	switch (appLayer->status)
