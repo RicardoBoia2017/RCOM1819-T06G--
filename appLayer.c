@@ -86,11 +86,11 @@ void send(LinkLayer *linkLayer)
 	char* fileData = (char*) malloc(fileSize);
 	int nBytesRead = 0, sequenceNumber = 0;
 
-	while ((nBytesRead = fread(fileData, sizeof(unsigned char),fileSize , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
+	while ((nBytesRead = fread(fileData, sizeof(unsigned char),256 , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
-		sendData(linkLayer, fileData, fileSize, sequenceNumber++ % 255);
+		sendData(linkLayer, fileData, 256, sequenceNumber++ % 255);
 
-		memset(fileData, 0, 255);
+		memset(fileData, 0, 256);
 	}
 	
 	free(fileData);
@@ -153,7 +153,6 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	frame[2] = L2;
 	frame[3] = L1;
 
-	printf("%d\n", frame[3]);
 	printf("256 * %d + %d = %d\n", L2, L1, 256 * L2 + L1);
 
 	memcpy(&frame[4], buffer, size);
@@ -236,8 +235,9 @@ void receive(LinkLayer *linkLayer)
 			printf("Received end control packet.\n");
 
 			linkLayer->nRR++;
-			//sendMessage(linkLayer->fd, RR0); //Só para testes
-			//break;
+
+			sendMessage(linkLayer->fd, RR0); //Só para testes
+			break;
 		}
 
 		else if (C_data != 1) 
@@ -245,7 +245,6 @@ void receive(LinkLayer *linkLayer)
 			printf ("receive: packet received not expected\n");
 			exit(-1);
 		}
-
 
 		//N = linkLayer->frame[5];
 		L2 = linkLayer->frame[6];
