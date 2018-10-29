@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_SIZE 255 //talvez esteja mal
-
 typedef enum
 {
 	TRANSMITTER,
@@ -32,18 +30,9 @@ typedef struct
 	TLV *parameters;
 } ControlPacket;
 
-typedef struct
-{
-	unsigned int controlField;
-	unsigned int sequenceNumber;
-	unsigned int nOctets;
-	char *data;
-} DataPacket;
-
-//void setupAppLayer (ApplicationLayer *appLayer);
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer);
-void transmitter (LinkLayer * linkLayer);
-void receiver (LinkLayer * linkLayer);
+void transmitter(LinkLayer *linkLayer);
+void receiver(LinkLayer *linkLayer);
 void send(LinkLayer *linkLayer);
 int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters);
 int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber);

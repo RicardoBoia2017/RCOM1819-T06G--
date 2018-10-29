@@ -100,8 +100,6 @@ int stateValidMessage(int fd, const unsigned char cmd[])
 			exit(-1);
 		}
 
-		//printf("reader=%x state=%d\n", reader, state);
-
 		switch (state)
 		{
 		case 0:
@@ -159,7 +157,6 @@ int validateFrame(int fd, unsigned char *frame)
 			perror("validateFrame");
 			exit(-1);
 		}
-		//printf("reader=%x state=%d\n", reader, state);
 
 		switch (state)
 		{
@@ -290,10 +287,7 @@ char receiveResponse(int fd)
 	}
 
 	if (state == FINALSTATE)
-	{
-		printf("Command = %x\n", commandReceived);
 		return commandReceived;	
-	}
 	
 	return 0;
 }
@@ -343,21 +337,17 @@ int destuffing(unsigned char *frame, int size)
 	for (i = 1; i < (size - 1); i++)
 	{
 		if (frame[i] == ESC)
-		{
 			resultSize--;
-		}
 	}
 
 	for (i = 0; i < size; i++)
 	{
 		if (frame[i] == ESC)
-		{
 			result[j] = frame[++i] ^ 0X20;
-		}
+		
 		else
-		{
 			result[j] = frame[i];
-		}
+		
 		j++;
 	}
 	memcpy(frame, result, resultSize);
@@ -372,8 +362,6 @@ int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received){
     for(;i<packetSize - 2;i++){
         expected ^= packet[i];
     }
-
-//	printf("Expected = %x  Received = %x\n", expected, received);
 
     return(expected==received);
 }

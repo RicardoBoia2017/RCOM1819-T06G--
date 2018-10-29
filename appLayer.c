@@ -1,13 +1,12 @@
 #include "appLayer.h"
-//#include "utilities.c"
 
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 {
 	if (openPort(linkLayer) < 0)
-		exit(-1);	
+		exit(-1);
 
 	else if (setTermiosStructure(linkLayer) < 0)
-		exit(-1);	
+		exit(-1);
 
 	switch (appLayer->status)
 	{
@@ -20,26 +19,26 @@ void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer)
 	}
 }
 
-void transmitter (LinkLayer * linkLayer)
+void transmitter(LinkLayer *linkLayer)
 {
-		if (llopenT(linkLayer) < 0)
-			exit(-1);
+	if (llopenT(linkLayer) < 0)
+		exit(-1);
 
-		send (linkLayer);
+	send(linkLayer);
 
-		if (llcloseT(linkLayer) < 0)
-			exit(-1);
+	if (llcloseT(linkLayer) < 0)
+		exit(-1);
 }
 
-void receiver (LinkLayer * linkLayer)
+void receiver(LinkLayer *linkLayer)
 {
-		if (llopenR(linkLayer) < 0)
-			exit(-1);
+	if (llopenR(linkLayer) < 0)
+		exit(-1);
 
-		receive (linkLayer);
+	receive(linkLayer);
 
-		if (llcloseR(linkLayer) < 0)
-			exit(-1);
+	if (llcloseR(linkLayer) < 0)
+		exit(-1);
 }
 
 void send(LinkLayer *linkLayer)
@@ -75,27 +74,23 @@ void send(LinkLayer *linkLayer)
 
 	sendControl(linkLayer, &startCP, 2);
 
-
 	//Data packet
 
 	FILE *file = openFile(1, linkLayer->fileName);
-	
-	
-	//DataPacket dataPacket;
-	//dataPacket.data = malloc(fileSize);
-	char* fileData = (char*) malloc(fileSize);
+
+	char *fileData = (char *)malloc(fileSize);
 	int nBytesRead = 0, sequenceNumber = 0;
 
-	while ((nBytesRead = fread(fileData, sizeof(unsigned char),256 , file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
+	while ((nBytesRead = fread(fileData, sizeof(unsigned char), 256, file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
 	{
 		sendData(linkLayer, fileData, 256, sequenceNumber++ % 255);
 
 		memset(fileData, 0, 256);
 	}
-	
+
 	free(fileData);
 	closeFile(file);
-	
+
 	//End control packet
 	ControlPacket endCP;
 	endCP = startCP;
@@ -118,7 +113,7 @@ int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParamet
 		packetSize += 2 + controlPacket->parameters[i].lenght;
 
 	unsigned char frame[packetSize];
-	frame[0] = controlPacket->controlField; //conversão de inteiro para char (pode estar errado)
+	frame[0] = controlPacket->controlField;
 
 	for (i = 0; i < nParameters; i++)
 	{
@@ -130,7 +125,7 @@ int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParamet
 
 	if (llwrite(linkLayer, frame, packetSize) < 0)
 		exit(-1);
-	
+
 	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	return 0;
@@ -146,20 +141,17 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 	L2 = size / 256;
 
 	packetSize = 4 + size;
-	unsigned char * frame = malloc (packetSize);
+	unsigned char *frame = malloc(packetSize);
 
 	frame[0] = 1;
 	frame[1] = sequenceNumber;
 	frame[2] = L2;
 	frame[3] = L1;
 
-	printf("256 * %d + %d = %d\n", L2, L1, 256 * L2 + L1);
-
 	memcpy(&frame[4], buffer, size);
 
 	if (llwrite(linkLayer, frame, packetSize) < 0)
 		exit(-1);
-	
 
 	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
@@ -174,14 +166,13 @@ void receive(LinkLayer *linkLayer)
 	clock_t startTime = clock();
 	//Start control packet
 
-	//	char* buffer = malloc(MAX_SIZE);
 	size = llread(linkLayer);
 
 	while (index < size)
 	{
-		unsigned int type = linkLayer->frame[index++]; //0 = size, 1 = name
+		unsigned int type = linkLayer->frame[index++];	//0 = size, 1 = name
 		unsigned char lenght = linkLayer->frame[index++]; //size of file
-		char *value = malloc(lenght); // either size or name, according to type
+		char *value = malloc(lenght);					  // either size or name, according to type
 
 		memcpy(value, &linkLayer->frame[index], lenght);
 
@@ -201,36 +192,35 @@ void receive(LinkLayer *linkLayer)
 
 	printf("Received start control packet.\n");
 	sendMessage(linkLayer->fd, RR0); //TODO esta mensagem varia
-	linkLayer->nRR++;	
+	linkLayer->nRR++;
 	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
-	
-	FILE *file = openFile(0, "e.gif"); //Mudar isto e colocar fileNAme
+
+	FILE *file = openFile(0, "e.gif"); //TODO Mudar isto e colocar fileNAme
 
 	while (1)
 	{
-		char * data;
-		int C_data, C_packet;//, N;
+		char *data;
+		int dataC, packetC;
 		unsigned int L1, L2, lenght;
 
-		size = llread (linkLayer);
+		size = llread(linkLayer);
 
 		if (size < 0)
 		{
-			printf ("llread error\n");
+			printf("llread error\n");
 			exit(-1);
 		}
 
 		// frame[0] = FLAG
 		// frame[1] = A
-		// frame[2] = C da trama, não dos dados 
+		// frame[2] = C da trama, não dos dados
 		// frame[3] = BBC1
 		// A partir do 4 começa dos dados
-		C_data = linkLayer->frame[4];
+		dataC = linkLayer->frame[4];
 
-
-		if (C_data == 3) //receives end control packet
+		if (dataC == 3) //receives end control packet
 		{
 			printf("Received end control packet.\n");
 
@@ -240,62 +230,49 @@ void receive(LinkLayer *linkLayer)
 			break;
 		}
 
-		else if (C_data != 1) 
+		else if (dataC != 1)
 		{
-			printf ("receive: packet received not expected\n");
+			printf("receive: packet received not expected\n");
 			exit(-1);
 		}
 
-		//N = linkLayer->frame[5];
 		L2 = linkLayer->frame[6];
 		L1 = linkLayer->frame[7];
 
 		lenght = 256 * L2 + L1;
 
-		C_packet = linkLayer->frame[2]; //que contém sequence number
-		//printf("C_packet = %d  Sequence number = %d\n", C_packet >> 6, linkLayer->sequenceNumber);
-		//printf("C_packet = %d\n", C_packet);
-		if (linkLayer->sequenceNumber != C_packet >> 6 || 
+		packetC = linkLayer->frame[2]; //que contém sequence number
+
+		if (linkLayer->sequenceNumber != packetC >> 6 ||
 			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) // se o sequence number não for o esperado TODO pôr validação do BCC2
 		{
 			linkLayer->nREJ++;
-			if(linkLayer->sequenceNumber)
-			{
+			if (linkLayer->sequenceNumber)
 				sendMessage(linkLayer->fd, REJ1);
-				printf("REJ1 send\n");
-			}
 			else
-			{
 				sendMessage(linkLayer->fd, REJ0);
-				printf("REJ0 send\n");
-			}
+
 			continue;
 		}
-		
+
 		data = malloc(lenght);
 
-		memcpy (data, &linkLayer->frame[8], lenght);
+		memcpy(data, &linkLayer->frame[8], lenght);
 
-		fwrite (data, sizeof(char), lenght, file);
+		fwrite(data, sizeof(char), lenght, file);
 		free(data);
 
 		linkLayer->nRR++;
-		if(linkLayer->sequenceNumber)
-		{
+		if (linkLayer->sequenceNumber)
 			sendMessage(linkLayer->fd, RR1);
-			printf("RR1 sent\n");
-		}
 		else
-		{
 			sendMessage(linkLayer->fd, RR0);
-			printf("RR0 sent\n");
-		}
 
 		linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 	}
 
 	closeFile(file);
-	
+
 	clock_t endTime = clock();
 
 	linkLayer->totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
