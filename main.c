@@ -27,6 +27,6 @@ int main(int argc, char *argv[]) {
 	
 	startAppLayer(linkLayer, appLayer);		
 
-	printf("Time: %f\n", linkLayer->totalTime);
+	printf("Time: %f s\n", linkLayer->totalTime);
 	return 0;
 }
