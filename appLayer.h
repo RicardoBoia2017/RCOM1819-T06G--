@@ -42,7 +42,8 @@ typedef struct
 
 //void setupAppLayer (ApplicationLayer *appLayer);
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer);
-unsigned int getFileSize(char *fileName);
+void transmitter (LinkLayer * linkLayer);
+void receiver (LinkLayer * linkLayer);
 void send(LinkLayer *linkLayer);
 int sendControl(LinkLayer *linkLayer, ControlPacket *controlPacket, int nParameters);
 int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber);
