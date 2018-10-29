@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	srand ( time(NULL) );
 
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
-	setupLinkLayer (linkLayer,1800);
+	setupLinkLayer (linkLayer,38400);
 
 	if ( (argc != 3) ||
 	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
