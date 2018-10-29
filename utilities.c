@@ -223,6 +223,74 @@ int validateFrame(int fd, char *frame)
 	return 4 + dataSize; // F + A + C + BCC1 + dataSize (Dados + BCC2 +)
 }
 
+char receiveResponse(int fd)
+{
+	int state = 0, aux;
+	unsigned char reader, commandReceived;
+
+	while (state != FINALSTATE && timeOut == FALSE)
+	{
+
+		aux = read(fd, &reader, 1);
+
+		if (aux == -1)
+		{
+			perror("receiveResponse");
+			exit(-1);
+		}
+
+		//printf("reader=%x state=%d\n", reader, state);
+
+		switch (state)
+		{
+		case 0:
+			if (reader == FLAG)
+			{
+				state = 1;
+			}
+			else
+				state = 0;
+			break;
+		case 1:
+			if (reader == A)
+				state = 2;
+
+			else if (reader != FLAG)
+				state = 0;
+			break;
+		case 2:
+			if (reader == C_RR0 ||
+				reader == C_RR1 ||
+				reader == C_REJ0 ||
+				reader == C_REJ1 )
+				{
+					commandReceived = reader;
+					state = 3;
+				}
+
+			else if (reader != FLAG)
+				state = 0;
+			break;
+		case 3:
+
+			if ( (commandReceived ^ A) == reader)
+				state = 4;
+			else
+				state = 0;
+
+			break;
+		case 4:
+			if (reader == FLAG)
+				state = 5;
+
+			else
+				state = 0;
+			break;
+		}
+	}
+	return commandReceived;	
+}
+
 int stuffing(char *frame, int size)
 {
 	char *result = malloc(20000);

@@ -143,38 +143,16 @@ int llwrite(LinkLayer *linkLayer, char *buffer, int lenght)
             return -1;
         }
 
-        char response[5];
-        int r = 0;
+        char response = 0;
+        response = receiveResponse(linkLayer->fd);
 
-       //TODO TIRAR ISTO QUANDO MAQUINA DE ESTADOS DE RR E REJ ESTIVER FEITA
-        while (1)
-        {
-         //   printf("%d\n", r);
-            if ((r = read(linkLayer->fd, response, 5)) > 0)
-            {
-                printf("Break\n");
-                setTimeOut(FALSE);
-                break;
-            }
-        }
+        if (response == C_RR0 ||
+            response == C_RR1)
+            linkLayer->nRR++;
 
-        if (linkLayer->sequenceNumber == 1)
-        {
-            if (response[2] == C_RR1)
-                linkLayer->nRR++;
-
-            else if (response[2] == C_REJ1)
-                linkLayer->nREJ++;
-        }
-
-        else if (linkLayer->sequenceNumber == 0)
-        {
-            if (response[2] == C_RR0)
-                linkLayer->nRR++;
-
-            else if (response[2] == C_REJ0)
-                linkLayer->nREJ++;
-        }
+        else if (response == C_REJ0 ||
+                 response == C_REJ1) 
+            linkLayer->nRR++;
 
         alarm(0);
     }

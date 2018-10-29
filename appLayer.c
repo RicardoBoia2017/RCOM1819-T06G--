@@ -262,7 +262,7 @@ void receive(LinkLayer *linkLayer)
 			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) // se o sequence number não for o esperado TODO pôr validação do BCC2
 		{
 			linkLayer->nREJ++;
-			if(linkLayer)
+			if(linkLayer->sequenceNumber)
 				sendMessage(linkLayer->fd, REJ1);
 			else
 				sendMessage(linkLayer->fd, REJ0);
@@ -277,7 +277,7 @@ void receive(LinkLayer *linkLayer)
 		free(data);
 
 		linkLayer->nRR++;
-		if(linkLayer)
+		if(linkLayer->sequenceNumber)
 			sendMessage(linkLayer->fd, RR1);
 		else
 			sendMessage(linkLayer->fd, RR0);
