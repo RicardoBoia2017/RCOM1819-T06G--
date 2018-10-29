@@ -230,12 +230,15 @@ void receive(LinkLayer *linkLayer)
 		// A partir do 4 começa dos dados
 		C_data = linkLayer->frame[4];
 
+		stateValidMessage(linkLayer->fd,C_data);
+
 
 		if (C_data == 3) //receives end control packet
 		{
 			printf("Received end control packet.\n");
 
 			linkLayer->nRR++;
+			
 
 			sendMessage(linkLayer->fd, RR0); //Só para testes
 			break;
@@ -250,6 +253,9 @@ void receive(LinkLayer *linkLayer)
 		//N = linkLayer->frame[5];
 		L2 = linkLayer->frame[6];
 		L1 = linkLayer->frame[7];
+
+		stateValidMessage(linkLayer->fd,L2);
+		stateValidMessage(linkLayer->fd,L1);
 
 		lenght = 256 * L2 + L1;
 
