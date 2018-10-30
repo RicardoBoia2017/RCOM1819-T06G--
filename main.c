@@ -7,7 +7,7 @@
 
 void printStats (LinkLayer * linkLayer)
 {
-	printf("File name = %s\n", linkLayer->fileName);
+	printf("\nFile name = %s\n", linkLayer->fileName);
 	printf("File size = %d\n", linkLayer->fileSize);
 	printf("#RR = %d \n#REJ = %d\n", linkLayer->nRR, linkLayer->nREJ);
 	printf("Time: %f s\n", linkLayer->totalTime);
@@ -47,10 +47,10 @@ int main(int argc, char *argv[]) {
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
 
 
-	if ( (argc != 3) ||
+	if ( (argc != 4) ||
 	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
 	      (strcmp("/dev/ttyS1", argv[1])!=0) )) {
-	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1 filename\n");
+	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1 mode filename\n");
 	   exit(1);
 	 }
 
