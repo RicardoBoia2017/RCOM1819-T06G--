@@ -378,7 +378,7 @@ int isValidBcc2(unsigned char *packet, int packetSize, unsigned char received)
 	return (expected == received);
 }
 
-int simulateError (int value) 
+int simulateError (int value)
 {
 	int n = rand() % 100;
 //	printf("Valor = %d  Rand = %d\n", value, n);
@@ -393,23 +393,23 @@ int simulateError (int value)
 int validBaudRate(int brate){
 	int speed;
 	switch(brate){
-	case 600: speed=B600;
+	case 1: speed=B600;
         break;
-	case 1200: speed=B1200;
+	case 2: speed=B1200;
         break;
-	case 1800: speed=B1800;
+	case 3: speed=B1800;
         break;
-	case 2400: speed=B2400;
+	case 4: speed=B2400;
         break;
-	case 4800: speed=B4800;
+	case 5: speed=B4800;
         break;
-	case 9600: speed=B9600;
+	case 6: speed=B9600;
         break;
-	case 19200: speed=B19200;
+	case 7: speed=B19200;
         break;
-	case 38400: speed=B38400;
+	case 8: speed=B38400;
         break;
-	
+
 	}
 return speed;
 

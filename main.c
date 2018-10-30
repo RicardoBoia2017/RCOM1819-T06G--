@@ -8,17 +8,41 @@
 void printStats (LinkLayer * linkLayer)
 {
 	printf("File name = %s\n", linkLayer->fileName);
-	printf("File size = %d\n", linkLayer->fileSize);	
+	printf("File size = %d\n", linkLayer->fileSize);
 	printf("#RR = %d \n#REJ = %d\n", linkLayer->nRR, linkLayer->nREJ);
 	printf("Time: %f s\n", linkLayer->totalTime);
+}
+
+int  printChose()
+{
+	int bChose;
+	printf("Chose the Baudrate to transmit the File:");
+	printf("\n");
+	printf("1->600   2->1200  3->1800   4->2400 ");
+	printf("\n");
+	printf("5->4800  6->9600  7->19200  8->38400 ");
+	printf("\n\n");
+
+	printf("Enter the value:");
+	scanf("%d", &bChose);
+
+	while(bChose<1 || bChose>8){
+		printf("Invalid value\n");
+		printf("Enter the value:");
+		scanf("%d", &bChose);
+
+	}
+	return bChose;
 }
 
 int main(int argc, char *argv[]) {
 
 	srand ( time(NULL) );
+	int resultB;
+
 
 	LinkLayer * linkLayer = malloc(sizeof(LinkLayer));
-	setupLinkLayer (linkLayer,19200);
+
 
 	if ( (argc != 3) ||
 	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
@@ -27,16 +51,24 @@ int main(int argc, char *argv[]) {
 	   exit(1);
 	 }
 
+	resultB=printChose();
+	setupLinkLayer (linkLayer,resultB,argv[1]);
+
 	ApplicationLayer * appLayer = malloc(sizeof(ApplicationLayer));
 
-	if ((strcmp("0", argv[2]) == 0))
+
+
+
+	if ((strcmp("0", argv[2]) == 0)){
 		appLayer->status = TRANSMITTER;
+
+	}
 	else if ((strcmp("1", argv[2]) == 0))
 		appLayer->status = RECEIVER;
 	else
-		return -1;	
-	
-	startAppLayer(linkLayer, appLayer);		
+		return -1;
+
+	startAppLayer(linkLayer, appLayer);
 	printStats(linkLayer);
 	return 0;
 }
