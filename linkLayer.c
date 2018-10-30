@@ -1,7 +1,7 @@
 #include "linkLayer.h"
 #include <stdio.h>
 
-void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port)
+void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port,char* filename)
 {
     linkLayer->fd = -1;
     linkLayer->port =port;
@@ -11,7 +11,7 @@ void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port)
     linkLayer->numTransmissions = 3;
     linkLayer->frame = malloc(MAX_SIZE);
 
-    linkLayer->fileName = "cat.jpg"; //Considerar passar o nome do ficheiro por terminal
+    linkLayer->fileName = filename; //Considerar passar o nome do ficheiro por terminal
     linkLayer->fileSize = 0;
 
     linkLayer->nRR = 0;

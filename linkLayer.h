@@ -34,7 +34,7 @@ typedef struct
 
 struct termios oldtio, newtio;
 
-void setupLinkLayer(LinkLayer *linkLayer,int brate,char* port);
+void setupLinkLayer(LinkLayer *linkLayer,int brate,char* port,char* filename);
 int openPort(LinkLayer *linkLayer);
 int setTermiosStructure(LinkLayer *linkLayer);
 int llopenT(LinkLayer *linkLayer); // Tem que retornar inteiro

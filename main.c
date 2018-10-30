@@ -13,6 +13,9 @@ void printStats (LinkLayer * linkLayer)
 	printf("Time: %f s\n", linkLayer->totalTime);
 }
 
+
+
+
 int  printChose()
 {
 	int bChose;
@@ -47,12 +50,13 @@ int main(int argc, char *argv[]) {
 	if ( (argc != 3) ||
 	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
 	      (strcmp("/dev/ttyS1", argv[1])!=0) )) {
-	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
+	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1 filename\n");
 	   exit(1);
 	 }
 
+
 	resultB=printChose();
-	setupLinkLayer (linkLayer,resultB,argv[1]);
+	setupLinkLayer (linkLayer,resultB,argv[1],argv[3]);
 
 	ApplicationLayer * appLayer = malloc(sizeof(ApplicationLayer));
 
