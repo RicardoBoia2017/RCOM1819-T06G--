@@ -74,6 +74,7 @@ void send(LinkLayer *linkLayer)
 	gettimeofday(&start, NULL);
 
 	sendControl(linkLayer, &startCP, 2);
+	printf("Start control packet sent\n");
 
 	//Data packet
 
@@ -82,7 +83,8 @@ void send(LinkLayer *linkLayer)
 	char *fileData = (char *)malloc(linkLayer->fileSize);
 	int nBytesRead = 0, sequenceNumber = 0;
 
-	while ((nBytesRead = fread(fileData, sizeof(unsigned char), 256, file)) > 0) //TODO verificar tamanho de cada fread (fileSize ou 255)
+	printf("Sending data\n");
+	while ((nBytesRead = fread(fileData, sizeof(unsigned char), 256, file)) > 0) 
 	{
 		sendData(linkLayer, fileData, 256, sequenceNumber++ % 255);
 
@@ -100,6 +102,7 @@ void send(LinkLayer *linkLayer)
 	tcflush(linkLayer->fd, TCIOFLUSH);
 
 	sendControl(linkLayer, &endCP, 2);
+	printf("End control packet sent\n");
 
 	struct timeval end;
 	gettimeofday(&end, NULL);
@@ -228,7 +231,9 @@ void receive(LinkLayer *linkLayer)
 	linkLayer->fileName = fileName;
 	linkLayer->fileSize = fileSize;
 
-	FILE *file = openFile(0, linkLayer->fileName); //TODO Mudar isto e colocar fileNAme
+	FILE *file = openFile(0, linkLayer->fileName); 
+
+	printf("Receiving data\n");
 
 	while (1)
 	{

@@ -10,7 +10,7 @@ void printStats (LinkLayer * linkLayer)
 	printf("\nFile name = %s\n", linkLayer->fileName);
 	printf("File size = %d\n", linkLayer->fileSize);
 	printf("#RR = %d \n#REJ = %d\n", linkLayer->nRR, linkLayer->nREJ);
-	printf("Time: %f s\n", linkLayer->totalTime);
+	printf("Time: %f s\n\n", linkLayer->totalTime);
 }
 
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 	if ( (argc != 4) ||
 	     ((strcmp("/dev/ttyS0", argv[1])!=0) &&
 	      (strcmp("/dev/ttyS1", argv[1])!=0) )) {
-	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1 mode filename\n");
+	   printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS0 mode filename\n");
 	   exit(1);
 	 }
 
@@ -60,9 +60,6 @@ int main(int argc, char *argv[]) {
 
 	ApplicationLayer * appLayer = malloc(sizeof(ApplicationLayer));
 
-
-
-
 	if ((strcmp("0", argv[2]) == 0)){
 		appLayer->status = TRANSMITTER;
 
@@ -70,7 +67,10 @@ int main(int argc, char *argv[]) {
 	else if ((strcmp("1", argv[2]) == 0))
 		appLayer->status = RECEIVER;
 	else
+	{
+		printf("Mode must be either 0 (TRANSMITTER) or 1 (RECEIVER)\n.");
 		return -1;
+	}
 
 	startAppLayer(linkLayer, appLayer);
 	printStats(linkLayer);

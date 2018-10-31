@@ -5,13 +5,13 @@ void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port,char* filename)
 {
     linkLayer->fd = -1;
     linkLayer->port =port;
-    linkLayer->baudRate = validBaudRate(baudrate); //TODO change this
+    linkLayer->baudRate = validBaudRate(baudrate); 
     linkLayer->sequenceNumber = 0;
     linkLayer->timeout = 3;
     linkLayer->numTransmissions = 3;
     linkLayer->frame = malloc(MAX_SIZE);
 
-    linkLayer->fileName = filename; //Considerar passar o nome do ficheiro por terminal
+    linkLayer->fileName = filename;
     linkLayer->fileSize = 0;
 
     linkLayer->nRR = 0;
@@ -21,7 +21,7 @@ void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port,char* filename)
 
 int openPort(LinkLayer *linkLayer)
 {
-    linkLayer->fd = open(linkLayer->port, O_RDWR | O_NOCTTY); //port = /dev/ttyS0
+    linkLayer->fd = open(linkLayer->port, O_RDWR | O_NOCTTY);
 
     if (linkLayer->fd == -1)
     {

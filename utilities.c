@@ -8,6 +8,7 @@ int tries = 0;
 
 void alrmHanler(int sig)
 {
+	printf("alarme # %d\n", tries + 1);
 	timeOut = TRUE;
 	tries++;
 }
@@ -381,7 +382,7 @@ int isValidBcc2(unsigned char *packet, int packetSize, unsigned char received)
 int simulateError (int value)
 {
 	int n = rand() % 100;
-//	printf("Valor = %d  Rand = %d\n", value, n);
+
 	if (value == 1)
 		return n < ERRORPROBABILITY1;
 	if (value == 2)
