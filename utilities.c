@@ -82,7 +82,7 @@ void sendMessage(int fd, const unsigned char cmd[])
 	}
 }
 
-int stateValidMessage(int fd, const unsigned char cmd[])
+int validateCommand(int fd, const unsigned char cmd[])
 {
 	int state = 0, aux;
 	unsigned char reader;
@@ -94,7 +94,7 @@ int stateValidMessage(int fd, const unsigned char cmd[])
 
 		if (aux == -1)
 		{
-			perror("stateValidMessage");
+			perror("validateCommand");
 			exit(-1);
 		}
 

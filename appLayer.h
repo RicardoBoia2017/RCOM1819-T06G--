@@ -16,20 +16,20 @@ typedef enum
 
 typedef struct
 {
-	Status status;
+	Status status; /*TRANSMITTER ou RECEIVER */
 } ApplicationLayer;
 
 typedef struct
 {
-	unsigned int type;
-	unsigned char lenght;
-	char *value;
+	unsigned int type; /* 0 - tamanho do ficheiro, 1 - nome do ficheiro */
+	unsigned char lenght; /* tamanho do campo value */
+	char *value; /* valor do parâmetro */
 } TLV;
 
 typedef struct
 {
-	unsigned int controlField;
-	TLV *parameters;
+	unsigned int controlField; /* 2 - start, 3 - end */
+	TLV *parameters; /* estrutura declarada em cima */
 } ControlPacket;
 
 void startAppLayer(LinkLayer *linkLayer, ApplicationLayer *appLayer);

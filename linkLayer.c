@@ -73,7 +73,7 @@ int llopenT(LinkLayer *linkLayer)
         alarm(linkLayer->timeout);
 
         sendMessage(linkLayer->fd, SETUP);
-        stateValidMessage(linkLayer->fd, UA);
+        validateCommand(linkLayer->fd, UA);
 
         alarm(0);
     }
@@ -91,7 +91,7 @@ int llopenR(LinkLayer *linkLayer)
 {
     setTimeOut(FALSE);
 
-    stateValidMessage(linkLayer->fd, SETUP);
+    validateCommand(linkLayer->fd, SETUP);
     sendMessage(linkLayer->fd, UA);
 
     return 0;
@@ -185,7 +185,7 @@ int llcloseT(LinkLayer *linkLayer)
 
         sendMessage(linkLayer->fd, DISC);
 
-        stateValidMessage(linkLayer->fd, DISC);
+        validateCommand(linkLayer->fd, DISC);
 
         alarm(0);
     }
@@ -208,7 +208,7 @@ int llcloseR(LinkLayer *linkLayer)
 
     (void)signal(SIGALRM, alrmHanler);
 
-    stateValidMessage(linkLayer->fd, DISC);
+    validateCommand(linkLayer->fd, DISC);
 
     while (!outOfTries(linkLayer->numTransmissions) && getTimeOut() == TRUE)
     {
@@ -218,7 +218,7 @@ int llcloseR(LinkLayer *linkLayer)
 
         sendMessage(linkLayer->fd, DISC);
 
-        stateValidMessage(linkLayer->fd, UA);
+        validateCommand(linkLayer->fd, UA);
 
         alarm(0);
     }
