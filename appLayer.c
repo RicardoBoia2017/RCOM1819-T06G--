@@ -84,11 +84,11 @@ void send(LinkLayer *linkLayer)
 	int nBytesRead = 0, sequenceNumber = 0;
 
 	printf("Sending data\n");
-	while ((nBytesRead = fread(fileData, sizeof(unsigned char), 256, file)) > 0) 
+	while ((nBytesRead = fread(fileData, sizeof(unsigned char), BYTESTOSEND, file)) > 0) 
 	{
-		sendData(linkLayer, fileData, 256, sequenceNumber++ % 255);
+		sendData(linkLayer, fileData, BYTESTOSEND, sequenceNumber++ % 255);
 
-		memset(fileData, 0, 256);
+		memset(fileData, 0, BYTESTOSEND);
 	}
 
 	free(fileData);

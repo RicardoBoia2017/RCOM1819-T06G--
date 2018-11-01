@@ -16,20 +16,20 @@
 
 typedef struct
 {
-	int fd;						   //Descritor de ficheiro
+	int fd;						   /*Descritor de ficheiro */
 	char *port;					   /*Dispositivo /dev/ttySx, x = 0, 1*/
 	int baudRate;				   /*Velocidade de transmissão*/
 	unsigned int sequenceNumber;   /*Número de sequência da trama: 0, 1*/
-	unsigned int timeout;		   /*Valor do temporizador: 1 s*/
+	unsigned int timeout;		   /*Valor do temporizador:*/
 	unsigned int numTransmissions; /*Número de tentativas em caso de falha*/
-	unsigned char *frame;		   //trama
+	unsigned char *frame;		   /*Trama */
 
-	char *fileName; //nome do ficheiro
-	int fileSize;
+	char *fileName; /*nome do ficheiro */
+	int fileSize; /*tamanho do ficheiro */
 
-	unsigned int nRR;
-	unsigned int nREJ;
-	double totalTime;
+	unsigned int nRR; /*número de RRs enviados/recebidos */
+	unsigned int nREJ; /*número de REJs enviados/recebidos */
+	double totalTime; /*tempo decorrido durante a transmissão do ficheiro */
 } LinkLayer;
 
 struct termios oldtio, newtio;
