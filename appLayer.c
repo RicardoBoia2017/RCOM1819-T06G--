@@ -173,27 +173,10 @@ void receive(LinkLayer *linkLayer)
 	gettimeofday(&start, NULL);
 	//Start control packet
 	
-	while(1)
+	do
 	{
 		size = llread(linkLayer);
-		printf("%d\n",size);
-		if (linkLayer->sequenceNumber != linkLayer->frame[2] >> 6 ||
-		!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2]) ||
-		linkLayer->frame[4] != 2) 
-		{
-			linkLayer->nREJ++;
-			if (linkLayer->sequenceNumber)
-				sendMessage(linkLayer->fd, REJ1);
-			else
-				sendMessage(linkLayer->fd, REJ0);
-
-			continue;
-		}
-
-		else
-			break;
-
-	}
+	} while(linkLayer->frame[4] != 2);
 
 	while (index < size)
 	{
@@ -218,13 +201,6 @@ void receive(LinkLayer *linkLayer)
 	}
 
 	printf("Received start control packet.\n");
-	linkLayer->nRR++;
-	if (linkLayer->sequenceNumber)
-		sendMessage(linkLayer->fd, RR1);
-	else
-		sendMessage(linkLayer->fd, RR0);
-
-	linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 
 	//DAQUI PARA BAIXO LÊ OS DADOS ATÉ RECEBER CONTROL PACKET A INDICAR FIM
 
@@ -238,16 +214,13 @@ void receive(LinkLayer *linkLayer)
 	while (1)
 	{
 		char *data;
-		int dataC, packetC;
+		int dataC;
 		unsigned int L1, L2, lenght;
 
 		size = llread(linkLayer);
 
 		if (size < 0)
-		{
-			printf("llread error\n");
-			exit(-1);
-		}
+			continue;
 
 		// frame[0] = FLAG
 		// frame[1] = A
@@ -259,10 +232,6 @@ void receive(LinkLayer *linkLayer)
 		if (dataC == 3) //receives end control packet
 		{
 			printf("Received end control packet.\n");
-
-			linkLayer->nRR++;
-
-			sendMessage(linkLayer->fd, RR0); //Só para testes
 			break;
 		}
 
@@ -273,26 +242,14 @@ void receive(LinkLayer *linkLayer)
 				sendMessage(linkLayer->fd, REJ1);
 			else
 				sendMessage(linkLayer->fd, REJ0);
+
+			continue;
 		}
 
 		L2 = linkLayer->frame[6];
 		L1 = linkLayer->frame[7];
 
 		lenght = 256 * L2 + L1;
-
-		packetC = linkLayer->frame[2]; //que contém sequence number
-
-		if (linkLayer->sequenceNumber != packetC >> 6 ||
-			!isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2])) 
-		{
-			linkLayer->nREJ++;
-			if (linkLayer->sequenceNumber)
-				sendMessage(linkLayer->fd, REJ1);
-			else
-				sendMessage(linkLayer->fd, REJ0);
-
-			continue;
-		}
 
 		data = malloc(lenght);
 
@@ -301,13 +258,6 @@ void receive(LinkLayer *linkLayer)
 		fwrite(data, sizeof(char), lenght, file);
 		free(data);
 
-		linkLayer->nRR++;
-		if (linkLayer->sequenceNumber)
-			sendMessage(linkLayer->fd, RR1);
-		else
-			sendMessage(linkLayer->fd, RR0);
-
-		linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
 	}
 
 	closeFile(file);

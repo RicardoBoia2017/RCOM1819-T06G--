@@ -1,11 +1,11 @@
 #include "linkLayer.h"
 #include <stdio.h>
 
-void setupLinkLayer(LinkLayer *linkLayer,int baudrate,char* port,char* filename)
+void setupLinkLayer(LinkLayer *linkLayer, int baudrate, char *port, char *filename)
 {
     linkLayer->fd = -1;
-    linkLayer->port =port;
-    linkLayer->baudRate = validBaudRate(baudrate); 
+    linkLayer->port = port;
+    linkLayer->baudRate = validBaudRate(baudrate);
     linkLayer->sequenceNumber = 0;
     linkLayer->timeout = 3;
     linkLayer->numTransmissions = 3;
@@ -126,7 +126,7 @@ int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght)
     {
         setTimeOut(FALSE);
         alarm(linkLayer->timeout);
-     //   sleep(linkLayer->timeout - 1);
+        //   sleep(linkLayer->timeout - 1);
 
         if (write(linkLayer->fd, packet, newLenght + 6) < 0)
         {
@@ -168,6 +168,30 @@ int llread(LinkLayer *linkLayer)
     int size = validateFrame(linkLayer->fd, linkLayer->frame);
 
     size = destuffing(linkLayer->frame, size);
+
+    if (linkLayer->sequenceNumber != linkLayer->frame[2] >> 6 ||
+        !isValidBcc2(linkLayer->frame, size, linkLayer->frame[size - 2]))
+    {
+        linkLayer->nREJ++;
+        size = -1;
+
+        if (linkLayer->sequenceNumber)
+            sendMessage(linkLayer->fd, REJ1);
+        else
+            sendMessage(linkLayer->fd, REJ0);
+    }
+
+    else
+    {
+        linkLayer->nRR++;
+
+        if (linkLayer->sequenceNumber)
+            sendMessage(linkLayer->fd, RR1);
+        else
+            sendMessage(linkLayer->fd, RR0);
+
+        linkLayer->sequenceNumber = !linkLayer->sequenceNumber;
+    }
 
     return size;
 }

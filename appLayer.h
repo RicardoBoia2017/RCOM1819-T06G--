@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BYTESTOSEND 100
+#define BYTESTOSEND 256
 
 typedef enum
 {
