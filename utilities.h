@@ -11,7 +11,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define MAX_SIZE 255 //talvez esteja mal
+#define MAX_SIZE 255 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
 #define ERRORPROBABILITY1 0
