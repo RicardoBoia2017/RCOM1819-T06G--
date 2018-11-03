@@ -37,11 +37,11 @@ struct termios oldtio, newtio;
 void setupLinkLayer(LinkLayer *linkLayer,int brate,char* port,char* filename);
 int openPort(LinkLayer *linkLayer);
 int setTermiosStructure(LinkLayer *linkLayer);
-int llopenT(LinkLayer *linkLayer); // Tem que retornar inteiro
-int llopenR(LinkLayer *linkLayer); // Tem que retornar inteiro
+int llopenT(LinkLayer *linkLayer); 
+int llopenR(LinkLayer *linkLayer); 
 int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght);
 int llread(LinkLayer *linkLayer);
-int llcloseT(LinkLayer *linkLayer); // Tem que retornar inteiro
-int llcloseR(LinkLayer *linkLayer); // Tem que retornar inteiro
+int llcloseT(LinkLayer *linkLayer);
+int llcloseR(LinkLayer *linkLayer);
 
 #endif
