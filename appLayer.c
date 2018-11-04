@@ -167,7 +167,7 @@ int sendData(LinkLayer *linkLayer, char *buffer, int size, int sequenceNumber)
 void receive(LinkLayer *linkLayer)
 {
 	int size;
-	unsigned int fileSize, index = 0;
+	unsigned int fileSize, index;
 	char *fileName;
 	struct timeval start;
 	gettimeofday(&start, NULL);
@@ -177,6 +177,8 @@ void receive(LinkLayer *linkLayer)
 	{
 		size = llread(linkLayer);
 	} while(linkLayer->frame[4] != 2);
+
+	index = 0;
 
 	while (index < size)
 	{
@@ -207,7 +209,7 @@ void receive(LinkLayer *linkLayer)
 	linkLayer->fileName = fileName;
 	linkLayer->fileSize = fileSize;
 
-	FILE *file = openFile(0, linkLayer->fileName); 
+	FILE *file = openFile(0, "e.gif"); 
 
 	printf("Receiving data\n");
 
