@@ -65,6 +65,6 @@ int stuffing(unsigned char* frame,int size);
 int destuffing(unsigned char* frame,int size);
 int isValidBcc2(unsigned char * packet,int packetSize,unsigned char received);
 int simulateError();
-int  validBaudRate(int brate);
+int validBaudRate(int brate);
 
 #endif

@@ -154,7 +154,7 @@ int llwrite(LinkLayer *linkLayer, unsigned char *buffer, int lenght)
     if (outOfTries(linkLayer->numTransmissions))
     {
         printf("Failed to send the message (%d attemps)\n", linkLayer->numTransmissions);
-        return -1;
+        exit(-1);
     }
 
     return 0;
