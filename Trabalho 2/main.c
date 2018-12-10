@@ -17,6 +17,8 @@
 #define SERVER_PORT 6000
 #define SERVER_ADDR "192.168.28.96"
 #define MAX_SIZE 50
+#define PASSWORD_RESPONSE "230" //User logged in, proceed.
+#define USER_RESPONSE "331" //User name okay, need password.
 
 typedef struct
 {
@@ -26,19 +28,23 @@ typedef struct
     char *path;
     char *filename;
     char *ip;
-    unsigned int port;
 } URL;
 
 void initURL(URL *url);
 int parseURL(char *arg, URL *url);
 void showURLInfo(URL *url);
 void getIp(URL *url);
-void receiveResponse(int sockedfd);
+char * receiveResponse(int sockedfd);
+void login(int socketfd, URL *url);
+int handleResponse(int socketfd, char * cmd, char * expectedReponse);
+int passiveMode(int socketfd, URL * url);
+int getPort(int socketfd);
+void retrieve(int socketfd, URL *url);
 
 int main(int argc, char **argv)
 {
-    int sockfd;
-    struct sockaddr_in server_addr;
+    int sockfd, sockfd2;
+    struct sockaddr_in server_addr, server_addr2;
 
     if (argc != 2)
     {
@@ -72,9 +78,43 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    receiveResponse(sockfd);
+    char * response = malloc(3);
+    response = receiveResponse(sockfd);
+
+    if(response[0] == 3)
+        printf("Connection successfully completed\n");
+    
+    login(sockfd, &url);
+
+    int port = passiveMode(sockfd, &url);
+
+    /*server address handling*/
+    bzero((char *)&server_addr2, sizeof(server_addr2));
+    server_addr2.sin_family = AF_INET;
+    //MAY BE WRONG
+    server_addr2.sin_addr.s_addr = inet_addr(SERVER_ADDR); /*32 bit Internet address network byte ordered*/
+    server_addr2.sin_port = htons(port);            /*server TCP port must be network byte ordered */
+
+    /*open an TCP socket*/
+    if ((sockfd2 = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("socket()");
+        exit(0);
+    }
+    /*connect to the server*/
+    if (connect(sockfd2, (struct sockaddr *)&server_addr2, sizeof(server_addr2)) < 0)
+    {
+        perror("connect()");
+        exit(0);
+    }
+
+    retrieve(sockfd2, &url);
 
     close(sockfd);
+    close(sockfd2);
+
+    printf("File created. Program will now exit.");
+
     exit(0);
 }
 
@@ -98,7 +138,6 @@ void initURL(URL *url)
     url->ip = malloc(MAX_SIZE);
     memset(url->ip, 0, MAX_SIZE);
     
-    //    url->port = FTP_PORT;
 }
 
 int parseURL(char *arg, URL *url)
@@ -243,7 +282,7 @@ void getIp(URL *url)
     url->ip = inet_ntoa(*((struct in_addr *)h->h_addr));
 }
 
-void receiveResponse(int sockedfd)
+char * receiveResponse(int sockedfd)
 {
     /* Example:
     123- First line
@@ -253,7 +292,7 @@ void receiveResponse(int sockedfd)
 
     unsigned int state = 0, index = 0;
     char reader;
-    unsigned char code[3]; 
+    char * code = malloc(3); 
 
     while (state < 3)
     {
@@ -320,6 +359,191 @@ void receiveResponse(int sockedfd)
         }
     }
 
+    return code;
+}
 
+void login(int socketfd, URL *url)
+{
+    char * user = malloc(strlen(url->user)+6), * password = malloc(strlen(url->password)+6);
 
+    sprintf(user, "USER %s\n", url->user);
+    sprintf(password, "PASS %s\n", url->password);
+
+    if(write(socketfd, user, strlen(user)) < 0)
+    {
+        perror("Sending user");
+        exit(1);
+    }
+
+    if(handleResponse(socketfd, user, USER_RESPONSE) == 0)
+        printf("Username successfully sent\n");
+
+    if(write(socketfd, password, strlen(password)) < 0)
+    {
+        perror("Sending password");
+        exit(1);
+    }    
+
+    if(handleResponse(socketfd, password, PASSWORD_RESPONSE) == 0)
+        printf("Password successfully sent\n");
+}
+
+int handleResponse(int socketfd, char * cmd, char * expectedResponse)
+{
+    char * responseCode = malloc(3);
+    responseCode = receiveResponse(socketfd);
+
+    if(expectedResponse != NULL)
+    {
+        if(strcmp(responseCode, expectedResponse) == 0)
+            return 0;
+    }
+
+    while(1)
+    {
+
+        switch(responseCode[0])
+        {
+            //The requested action is being initiated; expect another reply before proceeding with a new command.
+            case 1:
+            {
+                receiveResponse(socketfd);
+                break;  
+            }
+            //The requested action has been successfully completed
+            case 2:
+            {
+                return 0;
+                break;
+            }
+            // The command has been accepted, but the requested action
+            // is being held in abeyance, pending receipt of further
+            // information.  The user should send another command
+            // specifying this information. (probably asking for password)
+            case 3:
+            {
+                return 0;
+                break;
+            }
+            //The command was not accepted and the requested action did
+            //   not take place, but the error condition is temporary and
+            //   the action may be requested again.
+            case 4:
+            {
+                write(socketfd, cmd, strlen(cmd));
+                receiveResponse(socketfd);
+                break;
+            }
+            //The command was not accepted and the requested action did
+            //not take place.  The User-process is discouraged from
+            //repeating the exact request (in the same sequence).
+            case 5:
+            {
+                printf("%s not accepted.", cmd);
+                close(socketfd);
+                exit(1);
+            }
+        }
+    }
+}
+
+int passiveMode(int socketfd, URL * url)
+{
+    int port;
+
+    if(write(socketfd, "PASV\n", strlen("PASV\n")) < 0)
+    {
+        perror("Entering passive mode");
+        exit(1);
+    }
+
+    port = getPort(socketfd);
+
+    return port;
+}
+
+int getPort(int socketfd)
+{
+    //Example: 227 Entering Passive Mode (A1,A2,A3,A4,a1,a2)
+
+    char prefix[26] = "227 Entering Passive Mode.";
+    unsigned int length = strlen(prefix), index = 0, a1 = 0, a2 = 0, counter = 0;
+    char reader;
+
+    //checks if prefix is ok
+    while(index < length)
+    {
+        read(socketfd, &reader, 1);
+        printf("%c", reader);
+        
+        if(prefix[index] == reader)
+        {
+            index++;
+            continue;
+        }
+
+        else
+        {
+            perror("Getting port");
+            exit(1);
+        }
+    }
+
+    //Gets port a1,a1
+    do
+    {
+        read(socketfd, &reader, 1);
+
+        //Finished reading a number
+        if(reader == ',')
+            counter++;
+
+        if(isdigit(reader))
+        {
+            //4 numbers read
+            if(counter == 4)
+                a1 = a1 * 10 + reader;
+
+            //5 numbers read            
+            else if(counter == 5)
+                a1 = a2 * 10 + reader;
+        }
+    }while(reader != '\n');
+
+    return a1 * 256 + a2;
+}
+
+void retrieve(int socketfd, URL *url)
+{
+    char * retrieve = malloc(strlen(url->filename)+6);
+
+    sprintf(retrieve, "RETR %s\n", url->filename);
+
+    if(write(socketfd, retrieve, strlen(retrieve)) < 0)
+    {
+        perror("Retrieving");
+        exit(1);
+    }
+
+    if(handleResponse(socketfd, retrieve, NULL) == 0)
+    {
+        printf("Information successfully retrieved\n");
+        fileCreation(socketfd, url->filename);
+    }
+}
+
+void fileCreation(int socketfd, char * filename)
+{
+    FILE *file;
+    char buffer[1024];
+    int bytesRead;
+
+    if ((file = fopen(filename, "wb+")) == NULL)
+	    return -1;
+	
+    while ((bytesRead = read(socketfd, buffer, 1024)) > 0) {
+    	bytesRead = fwrite(buffer, 1, bytesRead, file);
+    }
+
+    fclose(file);
 }
