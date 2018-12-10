@@ -14,7 +14,7 @@
 #include <netinet/in.h>
 #include <ctype.h>
 
-#define SERVER_PORT 6000
+#define SERVER_PORT 21
 #define SERVER_ADDR "192.168.28.96"
 #define MAX_SIZE 50
 #define PASSWORD_RESPONSE "230" //User logged in, proceed.
@@ -40,6 +40,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedReponse);
 int passiveMode(int socketfd, URL * url);
 int getPort(int socketfd);
 void retrieve(int socketfd, URL *url);
+void fileCreation(int socketfd, char * filename);
 
 int main(int argc, char **argv)
 {
@@ -56,13 +57,13 @@ int main(int argc, char **argv)
     initURL(&url);
 
     parseURL(argv[1], &url);
-    //    getIp(&url); //Dont know how to test it yet
+    getIp(&url); 
     showURLInfo(&url);
 
     /*server address handling*/
     bzero((char *)&server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR); /*32 bit Internet address network byte ordered*/
+    server_addr.sin_addr.s_addr = inet_addr(url.ip); /*32 bit Internet address network byte ordered*/
     server_addr.sin_port = htons(SERVER_PORT);            /*server TCP port must be network byte ordered */
 
     /*open an TCP socket*/
@@ -71,6 +72,7 @@ int main(int argc, char **argv)
         perror("socket()");
         exit(0);
     }
+
     /*connect to the server*/
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
     {
@@ -81,27 +83,27 @@ int main(int argc, char **argv)
     char * response = malloc(3);
     response = receiveResponse(sockfd);
 
-    if(response[0] == 3)
+    if(response[0] == 2)
         printf("Connection successfully completed\n");
-    
+
     login(sockfd, &url);
 
     int port = passiveMode(sockfd, &url);
 
-    /*server address handling*/
+    //server address handling
     bzero((char *)&server_addr2, sizeof(server_addr2));
     server_addr2.sin_family = AF_INET;
     //MAY BE WRONG
-    server_addr2.sin_addr.s_addr = inet_addr(SERVER_ADDR); /*32 bit Internet address network byte ordered*/
-    server_addr2.sin_port = htons(port);            /*server TCP port must be network byte ordered */
+    server_addr2.sin_addr.s_addr = inet_addr(SERVER_ADDR); //32 bit Internet address network byte ordered
+    server_addr2.sin_port = htons(port); //server TCP port must be network byte ordered 
 
-    /*open an TCP socket*/
+    //open an TCP socket
     if ((sockfd2 = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         perror("socket()");
         exit(0);
     }
-    /*connect to the server*/
+    //connect to the server
     if (connect(sockfd2, (struct sockaddr *)&server_addr2, sizeof(server_addr2)) < 0)
     {
         perror("connect()");
@@ -404,31 +406,30 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
 
         switch(responseCode[0])
         {
+
             //The requested action is being initiated; expect another reply before proceeding with a new command.
-            case 1:
+            case '1':
             {
                 receiveResponse(socketfd);
                 break;  
             }
             //The requested action has been successfully completed
-            case 2:
+            case '2':
             {
                 return 0;
-                break;
             }
             // The command has been accepted, but the requested action
             // is being held in abeyance, pending receipt of further
             // information.  The user should send another command
             // specifying this information. (probably asking for password)
-            case 3:
+            case '3':
             {
                 return 0;
-                break;
             }
             //The command was not accepted and the requested action did
             //   not take place, but the error condition is temporary and
             //   the action may be requested again.
-            case 4:
+            case '4':
             {
                 write(socketfd, cmd, strlen(cmd));
                 receiveResponse(socketfd);
@@ -437,7 +438,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             //The command was not accepted and the requested action did
             //not take place.  The User-process is discouraged from
             //repeating the exact request (in the same sequence).
-            case 5:
+            case '5':
             {
                 printf("%s not accepted.", cmd);
                 close(socketfd);
@@ -445,6 +446,8 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             }
         }
     }
+
+
 }
 
 int passiveMode(int socketfd, URL * url)
@@ -466,29 +469,40 @@ int getPort(int socketfd)
 {
     //Example: 227 Entering Passive Mode (A1,A2,A3,A4,a1,a2)
 
-    char prefix[26] = "227 Entering Passive Mode.";
-    unsigned int length = strlen(prefix), index = 0, a1 = 0, a2 = 0, counter = 0;
+    char prefix[26] = "227 Entering Passive Mode ";
+    unsigned int length = 0, index = 0, a1 = 0, a2 = 0, counter = 0;
     char reader;
+
+    length = strlen(prefix);
 
     //checks if prefix is ok
     while(index < length)
     {
         read(socketfd, &reader, 1);
         printf("%c", reader);
-        
+
         if(prefix[index] == reader)
         {
             index++;
+//		printf("IF 1\n");
             continue;
         }
 
-        else
+	else if(prefix[0] == reader && index != 0)
         {
-            perror("Getting port");
-            exit(1);
+            index = 1;
+//		printf("IF 2\n");
+            continue;
         }
-    }
 
+
+        /*else
+        {
+            printf("Error getting port information\n");
+            exit(1);
+        }*/
+    }
+	printf("ddfdf\n");
     //Gets port a1,a1
     do
     {
@@ -539,8 +553,11 @@ void fileCreation(int socketfd, char * filename)
     int bytesRead;
 
     if ((file = fopen(filename, "wb+")) == NULL)
-	    return -1;
-	
+    {
+	perror("Creating file");	
+	exit(1);
+    }
+			
     while ((bytesRead = read(socketfd, buffer, 1024)) > 0) {
     	bytesRead = fwrite(buffer, 1, bytesRead, file);
     }
