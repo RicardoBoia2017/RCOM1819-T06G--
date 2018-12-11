@@ -19,6 +19,8 @@
 #define MAX_SIZE 50
 #define PASSWORD_RESPONSE "230" //User logged in, proceed.
 #define USER_RESPONSE "331" //User name okay, need password.
+#define CWD_RESPONSE "250" //Requested file action okay, completed.
+
 
 typedef struct
 {
@@ -37,8 +39,9 @@ void getIp(URL *url);
 char * receiveResponse(int sockedfd);
 void login(int socketfd, URL *url);
 int handleResponse(int socketfd, char * cmd, char * expectedReponse);
+int changeDir(int socketfd, URL * url);
 int passiveMode(int socketfd, URL * url);
-int getPort(int socketfd);
+int getPort(int socketfd, URL * url);
 void retrieve(int socketfd, URL *url);
 void fileCreation(int socketfd, char * filename);
 
@@ -80,21 +83,18 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    char * response = malloc(3);
-    response = receiveResponse(sockfd);
-
-    if(response[0] == 2)
-        printf("Connection successfully completed\n");
+    receiveResponse(sockfd);
 
     login(sockfd, &url);
+
+    changeDir(sockfd, &url);
 
     int port = passiveMode(sockfd, &url);
 
     //server address handling
     bzero((char *)&server_addr2, sizeof(server_addr2));
     server_addr2.sin_family = AF_INET;
-    //MAY BE WRONG
-    server_addr2.sin_addr.s_addr = inet_addr(SERVER_ADDR); //32 bit Internet address network byte ordered
+    server_addr2.sin_addr.s_addr = inet_addr(url.ip); //32 bit Internet address network byte ordered
     server_addr2.sin_port = htons(port); //server TCP port must be network byte ordered 
 
     //open an TCP socket
@@ -109,13 +109,10 @@ int main(int argc, char **argv)
         perror("connect()");
         exit(0);
     }
-
     retrieve(sockfd2, &url);
 
     close(sockfd);
     close(sockfd2);
-
-    printf("File created. Program will now exit.");
 
     exit(0);
 }
@@ -231,7 +228,6 @@ int parseURL(char *arg, URL *url)
         //path
         case 4:
         {
-
             url->path[i] = arg[index];
             i++;
 
@@ -245,10 +241,15 @@ int parseURL(char *arg, URL *url)
     //filename is going to be the string after the last '/' in path
     unsigned int indexPath = 0, indexFilename = 0;
 
+    char * tmp = malloc(MAX_SIZE);
+    memset(tmp, 0, MAX_SIZE);
+    
     for (indexPath = 0; indexPath < strlen(url->path); indexPath++)
     {
         if (url->path[indexPath] == '/') // new directory
         {
+            strcat(tmp, "/");
+            strcat(tmp, url->filename);
             indexFilename = 0;
             memset(url->filename, 0, MAX_SIZE); //resets filename
             continue;
@@ -257,6 +258,8 @@ int parseURL(char *arg, URL *url)
         url->filename[indexFilename] = url->path[indexPath];
         indexFilename++;
     }
+
+    url->path = tmp;
 
     return 0;
 }
@@ -267,8 +270,8 @@ void showURLInfo(URL *url)
     printf("Password: %s\n", url->password);
     printf("Host: %s\n", url->host);
     printf("Ip address: %s\n", url->ip);
-    printf("Path: %s\n", url->path);
-    printf("Filename = %s\n", url->filename);
+    printf("Path: %s/%s\n", url->path, url->filename);
+    printf("Filename: %s\n", url->filename);
 }
 
 void getIp(URL *url)
@@ -295,11 +298,11 @@ char * receiveResponse(int sockedfd)
     unsigned int state = 0, index = 0;
     char reader;
     char * code = malloc(3); 
-
+    printf("Entrou\n\n");
     while (state < 3)
     {
         read(sockedfd, &reader, 1);
-        printf("%c", reader);
+        printf("%c\n", reader);
 
         switch(state)
         {
@@ -377,8 +380,7 @@ void login(int socketfd, URL *url)
         exit(1);
     }
 
-    if(handleResponse(socketfd, user, USER_RESPONSE) == 0)
-        printf("Username successfully sent\n");
+    handleResponse(socketfd, user, USER_RESPONSE);
 
     if(write(socketfd, password, strlen(password)) < 0)
     {
@@ -386,14 +388,14 @@ void login(int socketfd, URL *url)
         exit(1);
     }    
 
-    if(handleResponse(socketfd, password, PASSWORD_RESPONSE) == 0)
-        printf("Password successfully sent\n");
+    handleResponse(socketfd, password, PASSWORD_RESPONSE);
 }
 
 int handleResponse(int socketfd, char * cmd, char * expectedResponse)
 {
     char * responseCode = malloc(3);
     responseCode = receiveResponse(socketfd);
+        printf("%s\n", cmd);
 
     if(expectedResponse != NULL)
     {
@@ -412,10 +414,10 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             {
                 receiveResponse(socketfd);
                 break;  
-            }
+            }   
             //The requested action has been successfully completed
             case '2':
-            {
+            { 
                 return 0;
             }
             // The command has been accepted, but the requested action
@@ -450,6 +452,22 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
 
 }
 
+int changeDir(int socketfd, URL * url)
+{
+    char * cwd = malloc(strlen(url->user)+5);
+    sprintf(cwd, "CWD %s\n", url->path);
+
+    if(write(socketfd, cwd, strlen(cwd)) < 0)
+    {
+        perror("Changing directory");
+        exit(1);
+    }
+
+    handleResponse(socketfd, cwd, CWD_RESPONSE);
+
+    return 0;
+}
+
 int passiveMode(int socketfd, URL * url)
 {
     int port;
@@ -460,21 +478,18 @@ int passiveMode(int socketfd, URL * url)
         exit(1);
     }
 
-    port = getPort(socketfd);
+    port = getPort(socketfd, url);
 
     return port;
 }
 
-int getPort(int socketfd)
+int getPort(int socketfd, URL * url)
 {
     //Example: 227 Entering Passive Mode (A1,A2,A3,A4,a1,a2)
 
     char prefix[26] = "227 Entering Passive Mode ";
-    unsigned int length = 0, index = 0, a1 = 0, a2 = 0, counter = 0;
+    unsigned int length = 26, index = 0, A1 = 0, A2 = 0, A3 = 0, A4 = 0, a1 = 0, a2 = 0, counter = 1;
     char reader;
-
-    length = strlen(prefix);
-
     //checks if prefix is ok
     while(index < length)
     {
@@ -484,29 +499,25 @@ int getPort(int socketfd)
         if(prefix[index] == reader)
         {
             index++;
-//		printf("IF 1\n");
             continue;
         }
 
-	else if(prefix[0] == reader && index != 0)
+    	else if(prefix[0] == reader && index != 0 && index !=1)
         {
-            index = 1;
-//		printf("IF 2\n");
+            index = 2;
             continue;
         }
 
+        else 
+            index = 0;
 
-        /*else
-        {
-            printf("Error getting port information\n");
-            exit(1);
-        }*/
     }
-	printf("ddfdf\n");
     //Gets port a1,a1
     do
     {
+        
         read(socketfd, &reader, 1);
+        printf("%c", reader);
 
         //Finished reading a number
         if(reader == ',')
@@ -514,23 +525,41 @@ int getPort(int socketfd)
 
         if(isdigit(reader))
         {
-            //4 numbers read
-            if(counter == 4)
-                a1 = a1 * 10 + reader;
+            unsigned int converted = reader - '0';
 
-            //5 numbers read            
-            else if(counter == 5)
-                a1 = a2 * 10 + reader;
+            switch(counter)
+            {
+                case 1:
+                    A1 = A1 * 10 + converted;
+                    break;
+                case 2:
+                    A2 = A2 * 10 + converted;
+                    break;
+                case 3:
+                    A3 = A3 * 10 + converted;
+                    break;
+                case 4:
+                    A4 = A4 * 10 + converted; 
+                    break;       
+                case 5:
+                    a1 = a1 * 10 + converted;
+                    break;
+                case 6:    
+                    a2 = a2 * 10 + converted;
+                    break;
+
+            }
         }
-    }while(reader != '\n');
+    }while(reader != '.');
+    printf("\n");
 
+    sprintf(url->ip,"%d.%d.%d.%d", A1, A2, A3, A4);
     return a1 * 256 + a2;
 }
 
 void retrieve(int socketfd, URL *url)
 {
     char * retrieve = malloc(strlen(url->filename)+6);
-
     sprintf(retrieve, "RETR %s\n", url->filename);
 
     if(write(socketfd, retrieve, strlen(retrieve)) < 0)
@@ -538,12 +567,14 @@ void retrieve(int socketfd, URL *url)
         perror("Retrieving");
         exit(1);
     }
-
-    if(handleResponse(socketfd, retrieve, NULL) == 0)
+handleResponse(socketfd, retrieve, USER_RESPONSE);
+/*    if(handleResponse(socketfd, retrieve, USER_RESPONSE) == 0)
     {
-        printf("Information successfully retrieved\n");
         fileCreation(socketfd, url->filename);
-    }
+    }*/
+
+
+
 }
 
 void fileCreation(int socketfd, char * filename)
