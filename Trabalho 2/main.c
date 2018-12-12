@@ -42,7 +42,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedReponse);
 int changeDir(int socketfd, URL * url);
 int passiveMode(int socketfd, URL * url);
 int getPort(int socketfd, URL * url);
-void retrieve(int socketfd, URL *url);
+void retrieve(int socketfd, int socketfd2, URL *url);
 void fileCreation(int socketfd, char * filename);
 
 int main(int argc, char **argv)
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
         perror("connect()");
         exit(0);
     }
-    retrieve(sockfd2, &url);
+    retrieve(sockfd, sockfd2, &url);
 
     close(sockfd);
     close(sockfd2);
@@ -298,11 +298,11 @@ char * receiveResponse(int sockedfd)
     unsigned int state = 0, index = 0;
     char reader;
     char * code = malloc(3); 
-    printf("Entrou\n\n");
+    printf("\nEntrou\n\n");
     while (state < 3)
     {
         read(sockedfd, &reader, 1);
-        printf("%c\n", reader);
+        printf("%c", reader);
 
         switch(state)
         {
@@ -550,14 +550,14 @@ int getPort(int socketfd, URL * url)
 
             }
         }
-    }while(reader != '.');
-    printf("\n");
-
+    }while(reader != ')');
+    printf(".\n");
+    printf("555\n");
     sprintf(url->ip,"%d.%d.%d.%d", A1, A2, A3, A4);
     return a1 * 256 + a2;
 }
 
-void retrieve(int socketfd, URL *url)
+void retrieve(int socketfd, int socketfd2, URL *url)
 {
     char * retrieve = malloc(strlen(url->filename)+6);
     sprintf(retrieve, "RETR %s\n", url->filename);
@@ -567,14 +567,12 @@ void retrieve(int socketfd, URL *url)
         perror("Retrieving");
         exit(1);
     }
-handleResponse(socketfd, retrieve, USER_RESPONSE);
-/*    if(handleResponse(socketfd, retrieve, USER_RESPONSE) == 0)
+    printf("570\n");
+    if(handleResponse(socketfd, retrieve, USER_RESPONSE) == 0)
     {
-        fileCreation(socketfd, url->filename);
-    }*/
-
-
-
+        printf("In\n");
+        fileCreation(socketfd2, url->filename);
+    }
 }
 
 void fileCreation(int socketfd, char * filename)
