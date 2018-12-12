@@ -111,6 +111,8 @@ int main(int argc, char **argv)
     }
     retrieve(sockfd, sockfd2, &url);
 
+    printf("File retrieved. Program will now exit.\n");
+
     close(sockfd);
     close(sockfd2);
 
@@ -298,7 +300,7 @@ char * receiveResponse(int sockedfd)
     unsigned int state = 0, index = 0;
     char reader;
     char * code = malloc(3); 
-    printf("\nEntrou\n\n");
+
     while (state < 3)
     {
         read(sockedfd, &reader, 1);
@@ -395,7 +397,6 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
 {
     char * responseCode = malloc(3);
     responseCode = receiveResponse(socketfd);
-        printf("%s\n", cmd);
 
     if(expectedResponse != NULL)
     {
@@ -405,6 +406,8 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
 
     while(1)
     {
+	if(strcmp(expectedResponse,CWD_RESPONSE) == 0)
+		printf("Resp: %s\n", responseCode); 
 
         switch(responseCode[0])
         {
@@ -412,6 +415,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             //The requested action is being initiated; expect another reply before proceeding with a new command.
             case '1':
             {
+		printf("Cmd = %s\n", cmd);
                 receiveResponse(socketfd);
                 break;  
             }   
@@ -552,7 +556,7 @@ int getPort(int socketfd, URL * url)
         }
     }while(reader != ')');
     printf(".\n");
-    printf("555\n");
+
     sprintf(url->ip,"%d.%d.%d.%d", A1, A2, A3, A4);
     return a1 * 256 + a2;
 }
@@ -567,12 +571,8 @@ void retrieve(int socketfd, int socketfd2, URL *url)
         perror("Retrieving");
         exit(1);
     }
-    printf("570\n");
-    if(handleResponse(socketfd, retrieve, USER_RESPONSE) == 0)
-    {
-        printf("In\n");
-        fileCreation(socketfd2, url->filename);
-    }
+    handleResponse(socketfd, retrieve, NULL);
+    fileCreation(socketfd2, url->filename);
 }
 
 void fileCreation(int socketfd, char * filename)
