@@ -1,1 +1,1 @@
-ftp://anonymous:ds@ftp.up.pt/pub/ubuntu/ls-lR.zg
+./download ftp://anonymous:ds@ftp.up.pt/pub/ubuntu/indices/override.artful-backports.main.src 

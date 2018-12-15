@@ -16,7 +16,7 @@
 
 #define SERVER_PORT 21
 #define SERVER_ADDR "192.168.28.96"
-#define MAX_SIZE 50
+#define MAX_SIZE 1000
 #define PASSWORD_RESPONSE "230" //User logged in, proceed.
 #define USER_RESPONSE "331" //User name okay, need password.
 #define CWD_RESPONSE "250" //Requested file action okay, completed.
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     initURL(&url);
 
     parseURL(argv[1], &url);
-    getIp(&url); 
+    getIp(&url);
     showURLInfo(&url);
 
     /*server address handling*/
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     bzero((char *)&server_addr2, sizeof(server_addr2));
     server_addr2.sin_family = AF_INET;
     server_addr2.sin_addr.s_addr = inet_addr(url.ip); //32 bit Internet address network byte ordered
-    server_addr2.sin_port = htons(port); //server TCP port must be network byte ordered 
+    server_addr2.sin_port = htons(port); //server TCP port must be network byte ordered
 
     //open an TCP socket
     if ((sockfd2 = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -123,22 +123,22 @@ void initURL(URL *url)
 {
     url->user = malloc(MAX_SIZE);
     memset(url->user, 0, MAX_SIZE);
-    
+
     url->password = malloc(MAX_SIZE);
     memset(url->password, 0, MAX_SIZE);
-    
+
     url->host = malloc(MAX_SIZE);
     memset(url->host, 0, MAX_SIZE);
-    
+
     url->path = malloc(MAX_SIZE);
     memset(url->path, 0, MAX_SIZE);
-    
+
     url->filename = malloc(MAX_SIZE);
     memset(url->filename, 0, MAX_SIZE);
-    
+
     url->ip = malloc(MAX_SIZE);
     memset(url->ip, 0, MAX_SIZE);
-    
+
 }
 
 int parseURL(char *arg, URL *url)
@@ -245,7 +245,7 @@ int parseURL(char *arg, URL *url)
 
     char * tmp = malloc(MAX_SIZE);
     memset(tmp, 0, MAX_SIZE);
-    
+
     for (indexPath = 0; indexPath < strlen(url->path); indexPath++)
     {
         if (url->path[indexPath] == '/') // new directory
@@ -299,7 +299,7 @@ char * receiveResponse(int sockedfd)
 
     unsigned int state = 0, index = 0;
     char reader;
-    char * code = malloc(3); 
+    char * code = malloc(3);
 
     while (state < 3)
     {
@@ -316,7 +316,7 @@ char * receiveResponse(int sockedfd)
                 {
                     if(index != 3)
                     {
-                        printf("Error reading response 3-digit code\n");
+                        printf("Error reading response's 3-digit code\n");
                         exit(1);
                     }
 
@@ -335,8 +335,9 @@ char * receiveResponse(int sockedfd)
                 else if(isdigit(reader))
                 {
                     code[index] = reader;
-                    index++; 
+                    index++;
                 }
+                break;
             }
 
             //Last line is being read
@@ -345,23 +346,25 @@ char * receiveResponse(int sockedfd)
                 //If line ends, state machine also ends
                 if(reader == '\n')
                     state = 3;
+                break;
             }
 
             //Multi line codes
             case 2:
             {
                 //Since response code was found, that means that this is the last line
-                if(index==3 && reader == ' ')
+                if(index == 3 && reader == ' ')
                     state = 1;
 
-                //Code being read can be the response code 
+                //Code being read can be the response code
                 else if(reader == code[index])
                     index++;
 
                 //Response code was found but the line is not the last one
-                else if(index == 3 && reader == ' ')
+                else if(index == 3 && reader == '-')
                     index = 0;
 
+                break;
             }
         }
     }
@@ -382,15 +385,16 @@ void login(int socketfd, URL *url)
         exit(1);
     }
 
-    handleResponse(socketfd, user, USER_RESPONSE);
-
-    if(write(socketfd, password, strlen(password)) < 0)
+    if (handleResponse(socketfd, user, USER_RESPONSE) == 3)
     {
-        perror("Sending password");
-        exit(1);
-    }    
+	    if(write(socketfd, password, strlen(password)) < 0)
+	    {
+      		perror("Sending password");
+      		exit(1);
+	    }
 
-    handleResponse(socketfd, password, PASSWORD_RESPONSE);
+	    handleResponse(socketfd, password, PASSWORD_RESPONSE);
+    }
 }
 
 int handleResponse(int socketfd, char * cmd, char * expectedResponse)
@@ -398,31 +402,21 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
     char * responseCode = malloc(3);
     responseCode = receiveResponse(socketfd);
 
-    if(expectedResponse != NULL)
-    {
-        if(strcmp(responseCode, expectedResponse) == 0)
-            return 0;
-    }
-
     while(1)
     {
-	if(strcmp(expectedResponse,CWD_RESPONSE) == 0)
-		printf("Resp: %s\n", responseCode); 
-
         switch(responseCode[0])
         {
 
             //The requested action is being initiated; expect another reply before proceeding with a new command.
             case '1':
             {
-		printf("Cmd = %s\n", cmd);
-                receiveResponse(socketfd);
-                break;  
-            }   
+                responseCode = receiveResponse(socketfd);
+                break;
+            }
             //The requested action has been successfully completed
             case '2':
-            { 
-                return 0;
+            {
+                return 2;
             }
             // The command has been accepted, but the requested action
             // is being held in abeyance, pending receipt of further
@@ -430,7 +424,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             // specifying this information. (probably asking for password)
             case '3':
             {
-                return 0;
+                return 3;
             }
             //The command was not accepted and the requested action did
             //   not take place, but the error condition is temporary and
@@ -438,7 +432,7 @@ int handleResponse(int socketfd, char * cmd, char * expectedResponse)
             case '4':
             {
                 write(socketfd, cmd, strlen(cmd));
-                receiveResponse(socketfd);
+                responseCode = receiveResponse(socketfd);
                 break;
             }
             //The command was not accepted and the requested action did
@@ -512,14 +506,14 @@ int getPort(int socketfd, URL * url)
             continue;
         }
 
-        else 
+        else
             index = 0;
 
     }
     //Gets port a1,a1
     do
     {
-        
+
         read(socketfd, &reader, 1);
         printf("%c", reader);
 
@@ -543,12 +537,12 @@ int getPort(int socketfd, URL * url)
                     A3 = A3 * 10 + converted;
                     break;
                 case 4:
-                    A4 = A4 * 10 + converted; 
-                    break;       
+                    A4 = A4 * 10 + converted;
+                    break;
                 case 5:
                     a1 = a1 * 10 + converted;
                     break;
-                case 6:    
+                case 6:
                     a2 = a2 * 10 + converted;
                     break;
 
@@ -583,10 +577,10 @@ void fileCreation(int socketfd, char * filename)
 
     if ((file = fopen(filename, "wb+")) == NULL)
     {
-	perror("Creating file");	
+	perror("Creating file");
 	exit(1);
     }
-			
+
     while ((bytesRead = read(socketfd, buffer, 1024)) > 0) {
     	bytesRead = fwrite(buffer, 1, bytesRead, file);
     }
