@@ -38,7 +38,7 @@ void showURLInfo(URL *url);
 void getIp(URL *url);
 char * receiveResponse(int sockedfd);
 void login(int socketfd, URL *url);
-int handleResponse(int socketfd, char * cmd, char * expectedReponse);
+int handleResponse(int socketfd, char * cmd, int socketfd2, URL *url);
 int changeDir(int socketfd, URL * url);
 int passiveMode(int socketfd, URL * url);
 int getPort(int socketfd, URL * url);
@@ -385,7 +385,7 @@ void login(int socketfd, URL *url)
         exit(1);
     }
 
-    if (handleResponse(socketfd, user, USER_RESPONSE) == 3)
+    if (handleResponse(socketfd, user, 0, url) == 3)
     {
 	    if(write(socketfd, password, strlen(password)) < 0)
 	    {
@@ -393,23 +393,30 @@ void login(int socketfd, URL *url)
       		exit(1);
 	    }
 
-	    handleResponse(socketfd, password, PASSWORD_RESPONSE);
+	    handleResponse(socketfd, password, 0, url);
     }
 }
 
-int handleResponse(int socketfd, char * cmd, char * expectedResponse)
+int handleResponse(int socketfd, char * cmd, int socketfd2, URL *url)
 {
     char * responseCode = malloc(3);
     responseCode = receiveResponse(socketfd);
 
     while(1)
     {
+
         switch(responseCode[0])
         {
 
             //The requested action is being initiated; expect another reply before proceeding with a new command.
             case '1':
             {
+              if (cmd[0] == 'R' &&
+                  cmd[1] == 'E' &&
+                  cmd[2] == 'T' &&
+                  cmd[3] == 'R')
+                  fileCreation(socketfd2, url->filename);
+
                 responseCode = receiveResponse(socketfd);
                 break;
             }
@@ -461,7 +468,7 @@ int changeDir(int socketfd, URL * url)
         exit(1);
     }
 
-    handleResponse(socketfd, cwd, CWD_RESPONSE);
+    handleResponse(socketfd, cwd, 0, url);
 
     return 0;
 }
@@ -565,8 +572,8 @@ void retrieve(int socketfd, int socketfd2, URL *url)
         perror("Retrieving");
         exit(1);
     }
-    handleResponse(socketfd, retrieve, NULL);
-    fileCreation(socketfd2, url->filename);
+
+    handleResponse(socketfd, retrieve, socketfd2, url);
 }
 
 void fileCreation(int socketfd, char * filename)
@@ -577,12 +584,12 @@ void fileCreation(int socketfd, char * filename)
 
     if ((file = fopen(filename, "wb+")) == NULL)
     {
-	perror("Creating file");
-	exit(1);
+    	perror("Creating file");
+    	exit(1);
     }
 
     while ((bytesRead = read(socketfd, buffer, 1024)) > 0) {
-    	bytesRead = fwrite(buffer, 1, bytesRead, file);
+    	bytesRead = fwrite(buffer, bytesRead, 1, file);
     }
 
     fclose(file);
