@@ -176,7 +176,16 @@ int parseURL(char *arg, URL *url)
         case 1:
         {
 
-            if (arg[index] == ':') //Finished
+            if (arg[index] == '/') //No username and password specified. User will be considered as "anonymous"
+            {
+                i = 0;
+                url->host = url->user;
+                url->user = "anonymous";
+                state = 4;
+                printf("1\n");
+            }
+
+            else if (arg[index] == ':') //Finished
             {
                 i = 0;
                 state = 2;
@@ -240,6 +249,7 @@ int parseURL(char *arg, URL *url)
         index++;
     }
 
+
     //filename is going to be the string after the last '/' in path
     unsigned int indexPath = 0, indexFilename = 0;
 
@@ -273,7 +283,7 @@ void showURLInfo(URL *url)
     printf("Host: %s\n", url->host);
     printf("Ip address: %s\n", url->ip);
     printf("Path: %s/%s\n", url->path, url->filename);
-    printf("Filename: %s\n", url->filename);
+    printf("Filename: %s\n\n", url->filename);
 }
 
 void getIp(URL *url)
@@ -556,7 +566,6 @@ int getPort(int socketfd, URL * url)
             }
         }
     }while(reader != ')');
-    printf(".\n");
 
     sprintf(url->ip,"%d.%d.%d.%d", A1, A2, A3, A4);
     return a1 * 256 + a2;
@@ -591,6 +600,4 @@ void fileCreation(int socketfd, char * filename)
     while ((bytesRead = read(socketfd, buffer, 1024)) > 0) {
     	bytesRead = fwrite(buffer, bytesRead, 1, file);
     }
-
-    fclose(file);
 }
