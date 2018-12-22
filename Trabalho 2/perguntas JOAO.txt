@@ -88,3 +88,26 @@ A informação de controlo ftp é transportada pela ligação de controlo.
 
 Quais são as fases de uma ligação TCP?
 
+Uma ligação TCP é composta por 3 fases
+1-Estabelecimento de conexão
+2-Troca de data
+3-Encerramento de conexão
+
+
+Como funciona o mecanismo ARQ TCP? Quais os campos relevantes TCP? Que informação relevante pode ser observada nos logs?
+
+O ARQ(Automatic Repeat Request) TCP utiliza o mecanismo Sliding Window que consiste no controlo de erros na transmissão
+dos dados. Utilizando os acknowledgment numbers das mensagens enviadas pelo recetor verifica se a trama está correta
+, o window size que indica de que gama podem ser os pacotes enviados pelo emissor e o sequence number que contém o número do pacote a ser enviado.
+
+
+Como funciona o mecanismo de controlo de congestão TCP? Quais são os campos relevantes? Como evolui o fluxo de dados?
+Funciona de acordo com o mecanismo de controlo de congestão TCP?
+
+Para o TCP mantém uma estimativa do número de octetos que a rede consegue encaminhar utiliza o mecanismo de controlo de congestão, impedindo assim
+que tente enviar mais octetos do que o da janela definida pelo recetor.
+(NESTA PeRGunta FALTA ALGUMA CENA DE AVALIAÇÃO DAS LOGS OU ASSIM)
+
+A ligação de data TCP é afetada pelo aparecimento de outra ligação TCP? Como?
+
+Sim pois quando é criada uma segunda ligação TCP leva a uma queda na taxa de transmissão, já que esta é dividida por cada uma.
